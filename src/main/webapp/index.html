@@ -1,0 +1,119 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="UTF-8">
+<title>Ecommerce Libera</title>
+
+<!-- Bulma core CSS -->
+<link rel="stylesheet" type="text/css" href="style/bulma.css">
+
+<!-- FontAwesome for icons -->
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css">
+
+<style>
+  body, html {
+    height: 100%;
+    margin: 0;
+    font-family: Arial, sans-serif;
+    background-color: #f7f7f7; /* Gris muy claro para el fondo */
+  }
+  .hero {
+    position: relative;
+    height: 100vh;
+    background-color: #ffffff; /* Fondo blanco para la sección principal */
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+  }
+  .hero-head {
+    margin-bottom: 20px; /* Espacio entre la imagen y el formulario */
+    text-align: center;
+  }
+  .hero-head img {
+    width: 120px; /* Ajusta el tamaño de la imagen según tus necesidades */
+    height: auto;
+  }
+  .form-signin {
+    max-width: 400px;
+    width: 100%;
+    background-color: #ffffff; /* Fondo blanco para el formulario */
+    padding: 20px;
+    border-radius: 8px;
+    box-shadow: 0 4px 8px rgba(0,0,0,0.1); /* Sombra más pronunciada para el formulario */
+  }
+  .button.is-success {
+    background-color: #007bff; /* Azul oscuro para el botón */
+    border-color: #007bff; /* Color de borde para el botón */
+  }
+  .button.is-success:hover {
+    background-color: #0056b3; /* Azul aún más oscuro para el hover */
+    border-color: #0056b3; /* Color de borde para el hover */
+  }
+  .input, .button {
+    color: #212529; /* Gris muy oscuro para el texto */
+  }
+  .input {
+    border: 1px solid #ced4da; /* Borde gris claro para el campo de entrada */
+  }
+  .input:focus {
+    border-color: #00aaff; /* Celeste-azul para el borde al enfocar */
+    box-shadow: 0 0 0 0.2rem rgba(0, 170, 255, 0.25); /* Sombra al enfocar */
+  }
+  .register-link {
+    text-align: center;
+    margin-top: 20px;
+  }
+  .register-link a {
+    color: #007bff; /* Azul oscuro para el enlace */
+    text-decoration: none;
+  }
+  .register-link a:hover {
+    text-decoration: underline; /* Subrayar el enlace al pasar el cursor */
+  }
+</style>
+
+</head>
+<body>
+  <section class="hero">
+    <div class="hero-head">
+      <img src="style/iconcarrito.png" alt="Icono Carrito">
+    </div>
+    <div class="hero-body">
+      <div class="form-signin">
+        <form action="signin" method="post">
+          <div class="field">
+            <p class="control has-icons-left has-icons-right">
+              <input class="input" type="email" placeholder="Email">
+              <span class="icon is-small is-left">
+                <i class="fas fa-envelope"></i>
+              </span>
+              <span class="icon is-small is-right">
+                <i class="fas fa-check"></i>
+              </span>
+            </p>
+          </div>
+          <div class="field">
+            <p class="control has-icons-left">
+              <input class="input" type="password" placeholder="Password">
+              <span class="icon is-small is-left">
+                <i class="fas fa-lock"></i>
+              </span>
+            </p>
+          </div>
+          <div class="field">
+            <p class="control">
+              <button class="button is-success is-fullwidth">
+                Login
+              </button>
+            </p>
+          </div>
+          <div class="register-link">
+            <p>¿No estás registrado? <a href="/register">Regístrate</a></p>
+          </div>
+        </form>
+      </div>
+    </div>
+  </section>
+</body>
+</html>
