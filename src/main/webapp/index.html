@@ -81,10 +81,10 @@
     </div>
     <div class="hero-body">
       <div class="form-signin">
-        <form action="signin" method="post">
+        <form action="Signin" method="post">
           <div class="field">
             <p class="control has-icons-left has-icons-right">
-              <input class="input" type="email" placeholder="Email">
+               <input id="inputEmail" name="email" class="input" placeholder="Email" required type="email">
               <span class="icon is-small is-left">
                 <i class="fas fa-envelope"></i>
               </span>
@@ -95,7 +95,7 @@
           </div>
           <div class="field">
             <p class="control has-icons-left">
-              <input class="input" type="password" placeholder="Password">
+              <input id="inputPassword" name="password" class="input" placeholder="Password" required type="password">
               <span class="icon is-small is-left">
                 <i class="fas fa-lock"></i>
               </span>
@@ -103,13 +103,13 @@
           </div>
           <div class="field">
             <p class="control">
-              <button class="button is-success is-fullwidth">
+              <button class="button is-success is-fullwidth" type ="submit">
                 Login
               </button>
             </p>
           </div>
           <div class="register-link">
-            <p>¿No estás registrado? <a href="/register">Regístrate</a></p>
+            <p>¿No estás registrado? <a href="register.html">Regístrate</a></p>
           </div>
         </form>
       </div>
@@ -117,3 +117,5 @@
   </section>
 </body>
 </html>
+
+
