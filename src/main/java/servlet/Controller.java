@@ -1,7 +1,7 @@
 package servlet;
 
 import jakarta.servlet.ServletException;
-
+import jakarta.servlet.annotation.MultipartConfig;
 import jakarta.servlet.annotation.WebServlet;
 import jakarta.servlet.http.HttpServlet;
 import jakarta.servlet.http.HttpServletRequest;
@@ -10,19 +10,21 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.util.*;
 import entities.*;
-import data.DataProducto;
+import data.*;
 import jakarta.servlet.http.Part;
 
 
 /**
  * Servlet implementation class Controller
  */
+@MultipartConfig
 public class Controller extends HttpServlet {
 	private static final long serialVersionUID = 1L;
        
 	DataProducto dp= new DataProducto();
 	List<Producto> productos = new ArrayList<Producto>();
 	Producto p= new Producto();
+	DataCategoria dc= new DataCategoria();
 	
 	protected void processRequest(HttpServletRequest request, HttpServletResponse response)
 		throws ServletException, IOException{
@@ -62,13 +64,17 @@ public class Controller extends HttpServlet {
 	 */
 	protected void doPost(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
 		String accion=request.getParameter("accion");
-		System.out.println(accion);
+		if (accion != null) {
 		switch (accion) {
-			case "ejemplo":
+			case "Listar":
+				List<Producto> productos=dp.getAll();
+				request.setAttribute("productos", productos);
+				request.getRequestDispatcher("prodcutosCRUD.jsp").forward(request, response);
 				break;
 			case "Nuevo":
 	            // Redirigir a productosCRUD.jsp
 	            request.getRequestDispatcher("prodcutosCRUD.jsp").forward(request, response);
+	            
 	            break;
 			case "Guardar":
 				try {
@@ -77,7 +83,7 @@ public class Controller extends HttpServlet {
                     String nom = request.getParameter("txtNom");
 
                     Part part = request.getPart("fileFoto");
-                    InputStream inputStream = part.getInputStream();
+                    InputStream inputStream = part.getInputStream(); 
 
                     String desc = request.getParameter("txtDesc");
                     double precio = Double.parseDouble(request.getParameter("numbPrecio"));
@@ -95,23 +101,33 @@ public class Controller extends HttpServlet {
                     p.setStock(stock);
                     p.setCat(cat);
 
-                    // Guardar el producto en la base de datos
-                    System.out.println("antes del add");
+                    // Guardar el producto en la base de datos           
                     dp.add(p);
-                    System.out.println("despues del add");
                     // Redirigir después de guardar
-                    request.getRequestDispatcher("Controller?accion=Nuevo").forward(request, response);
+                    
+                    request.getRequestDispatcher("Controller?accion=Listar").forward(request, response);
                 } catch (Exception e) {
                     e.printStackTrace();
                     response.sendRedirect("error.jsp"); // Página de error si algo falla
                 }
                 break;
+			case "Regresar":
+				try {
+					response.sendRedirect("index.jsp");
+					break;
+				}catch(Exception e){
+					e.printStackTrace();
+					response.sendRedirect("error.jsp");
+				}
 	        // Agrega casos adicionales si es necesario
 	        default:
 	            // Redirige a una página de error o a la página principal si la acción no está definida
 	            response.sendRedirect("index.jsp");
 	            break;
 		
+		}
+		} else {
+			System.out.println("accion es null");
 		}
 	}
 

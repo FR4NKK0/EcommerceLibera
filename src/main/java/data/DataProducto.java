@@ -1,7 +1,8 @@
 package data;
 
 import entities.*;
-import jakarta.servlet.http.HttpServletResponse;
+
+import jakarta.servlet.http.*;
 
 import java.io.*;
 import java.sql.*;
@@ -48,38 +49,60 @@ public class DataProducto {
 	}
 	
 	public void listarImg(int id, HttpServletResponse response) {
-		PreparedStatement stmt = null;
+	    PreparedStatement stmt = null;
 	    ResultSet rs = null;
-	    InputStream inputStream =null;
-	    OutputStream outputStream =null;
-	    BufferedInputStream bufferedInputStream=null;
-	    BufferedOutputStream bufferedOutputStream=null;	    
-		try {
-			outputStream=response.getOutputStream();
-			stmt =DbConnector.getInstancia().getConn().prepareStatement(
-		            "select * from producto where id = ?");
-			rs =stmt.executeQuery();
-			if(rs.next()) {
-				inputStream=rs.getBinaryStream("foto");
-			}
-			bufferedInputStream=new BufferedInputStream(inputStream);
-			bufferedOutputStream=new BufferedOutputStream(outputStream);
-			int i=0;
-			while ((i=bufferedInputStream.read())!=-1) {
-				bufferedOutputStream.write(i);
-			}
-				
-		} catch (Exception e) {
-			e.printStackTrace();
-		} finally {
+	    InputStream inputStream = null;
+	    OutputStream outputStream = null;
+	    BufferedInputStream bufferedInputStream = null;
+	    BufferedOutputStream bufferedOutputStream = null;    
+
+	    try {
+	        // Obtener el OutputStream de la respuesta
+	        outputStream = response.getOutputStream();
+
+	        // Crear el PreparedStatement con la consulta SQL
+	        stmt = DbConnector.getInstancia().getConn().prepareStatement(
+	                "SELECT foto FROM producto WHERE id = ?");
+
+	        // Establecer el valor del parámetro
+	        stmt.setInt(1, id);
+
+	        // Ejecutar la consulta
+	        rs = stmt.executeQuery();
+
+	        // Procesar el ResultSet
+	        if (rs.next()) {
+	            inputStream = rs.getBinaryStream("foto");
+	        }
+
+	        // Asegurarse de que el inputStream no sea nulo antes de continuar
+	        if (inputStream != null) {
+	            bufferedInputStream = new BufferedInputStream(inputStream);
+	            bufferedOutputStream = new BufferedOutputStream(outputStream);
+	            int i;
+	            while ((i = bufferedInputStream.read()) != -1) {
+	                bufferedOutputStream.write(i);
+	            }
+	        } else {
+	            response.sendError(HttpServletResponse.SC_NOT_FOUND); // Imagen no encontrada
+	        }
+	        
+	    } catch (Exception e) {
+	        e.printStackTrace();
+
+	    } finally {
 	        try {
 	            if (rs != null) rs.close();
 	            if (stmt != null) stmt.close();
+	            if (bufferedInputStream != null) bufferedInputStream.close();
+	            if (bufferedOutputStream != null) bufferedOutputStream.close();
 	            DbConnector.getInstancia().releaseConn();
 	        } catch (SQLException e) {
 	            e.printStackTrace();
+	        } catch (IOException e) {
+	            e.printStackTrace();
 	        }
-		}
+	    }
 	}
 
 	

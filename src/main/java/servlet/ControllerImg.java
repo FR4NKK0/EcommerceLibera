@@ -6,7 +6,7 @@ import jakarta.servlet.annotation.WebServlet;
 import jakarta.servlet.http.HttpServlet;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
-import java.io.IOException;
+import java.io.*;
 
 import data.*;
 import entities.*;
@@ -16,7 +16,7 @@ import entities.*;
  */
 public class ControllerImg extends HttpServlet {
 	private static final long serialVersionUID = 1L;
-    DataProducto dp= new DataProducto();
+    private DataProducto dp= new DataProducto();
     /**
      * @see HttpServlet#HttpServlet()
      */
@@ -30,8 +30,9 @@ public class ControllerImg extends HttpServlet {
 	 */
 	protected void doGet(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
 		// TODO Auto-generated method stub
-		//int id = Integer.parseInt(request.getParameter("id"));
-		//dp.listarImg(id, response);
+		
+		int id = Integer.parseInt(request.getParameter("id"));
+		dp.listarImg(id, response);
 	}
 
 	/**
