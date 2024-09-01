@@ -33,4 +33,27 @@
     <url-pattern>/Register</url-pattern>
     <url-pattern>/register</url-pattern>
   </servlet-mapping>
+  <servlet>
+    <description></description>
+    <display-name>Controller</display-name>
+    <servlet-name>Controller</servlet-name>
+    <servlet-class>servlet.Controller</servlet-class>
+  </servlet>
+  <servlet-mapping>
+    <servlet-name>Controller</servlet-name>
+    <url-pattern>/Controller</url-pattern>
+    <url-pattern>/controller</url-pattern>
+  </servlet-mapping>
+  <servlet>
+    <description></description>
+    <display-name>ControllerImg</display-name>
+    <servlet-name>ControllerImg</servlet-name>
+    <servlet-class>servlet.ControllerImg</servlet-class>
+  </servlet>
+  <servlet-mapping>
+    <servlet-name>ControllerImg</servlet-name>
+    <url-pattern>/ControllerImg</url-pattern>
+    <url-pattern>/controllerimg</url-pattern>
+    <url-pattern>/Controllerimg</url-pattern>
+  </servlet-mapping>
 </web-app>

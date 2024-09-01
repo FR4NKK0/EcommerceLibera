@@ -1,26 +1,26 @@
 package servlet;
 
 import jakarta.servlet.ServletException;
+
 import jakarta.servlet.annotation.WebServlet;
 import jakarta.servlet.http.HttpServlet;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
-import logic.Login;
-
 import java.io.IOException;
 
-import entities.Persona;
+import data.*;
+import entities.*;
 
 /**
- * Servlet implementation class Signin
+ * Servlet implementation class ControllerImg
  */
-public class Signin extends HttpServlet {
+public class ControllerImg extends HttpServlet {
 	private static final long serialVersionUID = 1L;
-       
+    DataProducto dp= new DataProducto();
     /**
      * @see HttpServlet#HttpServlet()
      */
-    public Signin() {
+    public ControllerImg() {
         super();
         // TODO Auto-generated constructor stub
     }
@@ -30,26 +30,16 @@ public class Signin extends HttpServlet {
 	 */
 	protected void doGet(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
 		// TODO Auto-generated method stub
-		response.getWriter().append("Served at: ").append(request.getContextPath());
+		//int id = Integer.parseInt(request.getParameter("id"));
+		//dp.listarImg(id, response);
 	}
 
 	/**
 	 * @see HttpServlet#doPost(HttpServletRequest request, HttpServletResponse response)
 	 */
 	protected void doPost(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
-		Persona per = new Persona();
-		Login ctrl = new Login();
-		String email = request.getParameter("email");
-		String password = request.getParameter("password");
-		//validar email y password
-		
-		per.setEmail(email);
-		per.setPassword(password);
-
-		
-		per = ctrl.validate(per);
-		
-		response.getWriter().append("Bienvenido ").append(per.getNombre()).append(" ").append(per.getApellido());
+		// TODO Auto-generated method stub
+		doGet(request, response);
 	}
 
 }
