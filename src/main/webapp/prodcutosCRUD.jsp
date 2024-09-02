@@ -123,13 +123,6 @@
                     </div>
                 </div>
 
-                <div class="field">
-                    <label class="label">Categoría:</label>
-                    <div class="control">
-                        <input class="input" type="text" name="idCat" required>
-                    </div>
-                </div>
-
                 <div class="field is-grouped">
                     <div class="control">
                         <button class="button is-link" type="submit" name="accion" value="Guardar">Guardar</button>
@@ -139,65 +132,65 @@
                     </div>
                 </div>
             </form>
-            <form action="Controller?accion=Listar" method="post">
-            	<div class="field is-grouped">
-                    <div class="control">
-                        <button class="button is-link" type="submit" name="accion" value="Listar">Listar</button>
+            
+            <form action="Controller?accion=Listar" method="post" class="is-pulled-right">
+                <div class="field is-grouped">
+                    <div class="control is-pulled-right">
+                        <button class="button is-link" type="submit" name="accion" value="Listar">Productos</button>
                     </div>
                 </div>
             </form>
             
-           <div class="table-container">
-            <h3 class="title is-4">Lista de Productos</h3>
-            <table class="table is-striped is-bordered is-hoverable is-fullwidth">
-                <thead>
-                    <tr>
-                        <th>ID</th>
-                        <th>Nombre</th>
-                        <th>Imagen</th>
-                        <th>Descripción</th>
-                        <th>Precio</th>
-                        <th>Stock</th>
-                        <th>Categoría</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    <% 
-                        // Obtener la lista de productos desde el atributo de solicitud
-                        List<Producto> productos = (List<Producto>) request.getAttribute("productos");
-                        if (productos != null) {
-                            for (Producto p: productos) {
-                    %>
-                    <tr>
-                        <td><%= p.getId() %></td>
-                        <td><%= p.getNombre() %></td>
-                        <td>
-                            <img src="ControllerImg?id=<%= p.getId() %>" alt="<%= p.getNombre() %>" style="max-width: 100px;">
-                        </td>
-                        <td><%= p.getDescripcion() %></td>
-                        <td><%= p.getPrecio() %></td>
-                        <td><%= p.getStock() %></td>
-                        <td><%= p.getCat().getNombre() %></td>
-                        <td>
-                        	<form>
-		                        	<div class="field is-grouped">
-		                    		<div class="control">
-		                        		<button class="button is-link" type="submit" name="accion" value="Edit">Edit</button>
-		                    		</div>
-		                    		<div class="control">
-		                        		<button class="button is-light" type="submit" name="accion" value="Delete">Delete</button>
-		                    		</div>
-		                </div>
-                			</form>
-                        </td>
-                    </tr>
-                    <% 
+            <div class="table-container">
+                <h3 class="title is-4">Lista de Productos</h3>
+                <table class="table is-striped is-bordered is-hoverable is-fullwidth">
+                    <thead>
+                        <tr>
+                            <th>ID</th>
+                            <th>Nombre</th>
+                            <th>Imagen</th>
+                            <th>Descripción</th>
+                            <th>Precio</th>
+                            <th>Stock</th>
+                            <th>Acciones</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <% 
+                            // Obtener la lista de productos desde el atributo de solicitud
+                            List<Producto> productos = (List<Producto>) request.getAttribute("productos");
+                            if (productos != null) {
+                                for (Producto p: productos) {
+                        %>
+                        <tr>
+                            <td><%= p.getId() %></td>
+                            <td><%= p.getNombre() %></td>
+                            <td>
+                                <img src="ControllerImg?id=<%= p.getId() %>" alt="<%= p.getNombre() %>" style="max-width: 100px;">
+                            </td>
+                            <td><%= p.getDescripcion() %></td>
+                            <td><%= p.getPrecio() %></td>
+                            <td><%= p.getStock() %></td>
+                            <td>
+                                <form action="Controller" method="post">
+                                    <div class="field is-grouped">
+                                        <div class="control">
+                                            <button class="button is-link" type="submit" name="accion" value="Edit">Edit</button>
+                                        </div>
+                                        <div class="control">
+                                            <button class="button is-light" type="submit" name="accion" value="Delete">Delete</button>
+                                        </div>
+                                    </div>
+                                </form>
+                            </td>
+                        </tr>
+                        <% 
+                                }
                             }
-                        }
-                    %>
-                </tbody>
-            </table>
-        </div>
+                        %>
+                    </tbody>
+                </table>
+            </div>
         </div>
     </div>
 </body>

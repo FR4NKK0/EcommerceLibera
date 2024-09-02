@@ -30,9 +30,17 @@ public class ControllerImg extends HttpServlet {
 	 */
 	protected void doGet(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
 		// TODO Auto-generated method stub
-		
-		int id = Integer.parseInt(request.getParameter("id"));
-		dp.listarImg(id, response);
+		try {
+			if(request.getParameter("id")!="") {
+				int id = Integer.parseInt(request.getParameter("id"));
+				dp.listarImg(id, response);}
+			else {
+				response.getWriter().write("No se ha proporcionado un ID válido o no hay productos cargados.");
+			}
+		} catch(Exception e){
+			 e.printStackTrace();
+		       response.getWriter().write("Ocurrió un error al procesar la solicitud.");
+		}
 	}
 
 	/**
