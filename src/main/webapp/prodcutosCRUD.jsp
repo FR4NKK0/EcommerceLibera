@@ -5,6 +5,7 @@
 <!DOCTYPE html>
 <html>
 <head>
+	<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css" integrity="sha384-k6RqeWeci5ZR/Lv4MR0sA0FfDOMm2JgX/aTk5lZeg6MOc1pYNeZTk5cBz6QeV6y" crossorigin="anonymous">
     <link rel="stylesheet" type="text/css" href="style/bulma.css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
     <meta charset="ISO-8859-1">
@@ -22,6 +23,30 @@
         .field label {
             font-weight: bold;
         }
+        .mt-4 {
+    	margin-right: 7rem; /* Puedes ajustar este valor según sea necesario */
+		}
+		.file-cta {
+        background-color: #ffdd57 !important;
+        color: rgba(0, 0, 0, 0.7) !important;
+        border: none !important;
+    }
+
+    .file-name {
+        border-color: #ffdd57 !important;
+        border-width: 1px !important;
+        border-style: solid !important;
+        border-left: none !important;
+    }
+
+    .file-label {
+        width: 100%;
+    }
+
+    .file-input:focus + .file-cta {
+        border-color: #3273dc;
+        box-shadow: 0 0 0 0.125em rgba(50, 115, 220, 0.25);
+    }
     </style>
 </head>
 <body>
@@ -84,114 +109,167 @@
     </nav>
 
     <div class="container">
-        <div class="form-section">
-            <h3 class="title is-3">Agregar Nuevo Producto</h3>
-            <hr>
-            <form action="Controller?accion=Guardar" method="post" enctype="multipart/form-data">
-                <div class="field">
-                    <label class="label">Nombre:</label>
-                    <div class="control">
-                        <input class="input" type="text" name="txtNom" required>
-                    </div>
-                </div>
+    <div class="form-section">
+        
 
-                <div class="field">
-                    <label class="label">Foto:</label>
-                    <div class="control">
-                        <input class="input" type="file" name="fileFoto" required>
-                    </div>
+        <div class="table-container">
+        <form action="Controller?accion=Listar" method="post" class="is-pulled-right" >
+            <div class="field is-grouped">
+                <div class="control is-pulled-right">
+                    <button class="button is-link" type="submit" name="accion" value="Listar">Productos</button>
                 </div>
-
-                <div class="field">
-                    <label class="label">Descripción:</label>
-                    <div class="control">
-                        <input class="input" type="text" name="txtDesc" required>
-                    </div>
+                <div class="control is-pulled-right">
+                    <button class="button is-link" type="button" onclick="openModal()">Agregar Nuevo Producto</button>
                 </div>
-
-                <div class="field">
-                    <label class="label">Precio:</label>
-                    <div class="control">
-                        <input class="input" type="text" name="numbPrecio" required>
-                    </div>
-                </div>
-
-                <div class="field">
-                    <label class="label">Stock:</label>
-                    <div class="control">
-                        <input class="input" type="text" name="numbStock" required>
-                    </div>
-                </div>
-
-                <div class="field is-grouped">
-                    <div class="control">
-                        <button class="button is-link" type="submit" name="accion" value="Guardar">Guardar</button>
-                    </div>
-                    <div class="control">
-                        <button class="button is-light" type="submit" name="accion" value="Regresar">Regresar</button>
-                    </div>
-                </div>
-            </form>
-            
-            <form action="Controller?accion=Listar" method="post" class="is-pulled-right">
-                <div class="field is-grouped">
-                    <div class="control is-pulled-right">
-                        <button class="button is-link" type="submit" name="accion" value="Listar">Productos</button>
-                    </div>
-                </div>
-            </form>
-            
-            <div class="table-container">
-                <h3 class="title is-4">Lista de Productos</h3>
-                <table class="table is-striped is-bordered is-hoverable is-fullwidth">
-                    <thead>
-                        <tr>
-                            <th>ID</th>
-                            <th>Nombre</th>
-                            <th>Imagen</th>
-                            <th>Descripción</th>
-                            <th>Precio</th>
-                            <th>Stock</th>
-                            <th>Acciones</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        <% 
-                            // Obtener la lista de productos desde el atributo de solicitud
-                            List<Producto> productos = (List<Producto>) request.getAttribute("productos");
-                            if (productos != null) {
-                                for (Producto p: productos) {
-                        %>
-                        <tr>
-                            <td><%= p.getId() %></td>
-                            <td><%= p.getNombre() %></td>
-                            <td>
-                                <img src="ControllerImg?id=<%= p.getId() %>" alt="<%= p.getNombre() %>" style="max-width: 100px;">
-                            </td>
-                            <td><%= p.getDescripcion() %></td>
-                            <td><%= p.getPrecio() %></td>
-                            <td><%= p.getStock() %></td>
-                            <td>
-                                <form action="Controller" method="post">
-                                    <div class="field is-grouped">
-                                        <div class="control">
-                                            <button class="button is-link" type="submit" name="accion" value="Edit">Edit</button>
-                                        </div>
-                                        <div class="control">
-                                            <button class="button is-light" type="submit" name="accion" value="Delete">Delete</button>
-                                        </div>
-                                    </div>
-                                </form>
-                            </td>
-                        </tr>
-                        <% 
-                                }
-                            }
-                        %>
-                    </tbody>
-                </table>
             </div>
+        </form>
+            <h3 class="title is-4">Lista de Productos</h3>
+            <hr>
+            
+        
+            <table class="table is-striped is-bordered is-hoverable is-fullwidth">
+			    <thead>
+			        <tr>
+			            <th>ID</th>
+			            <th>Nombre</th>
+			            <th>Imagen</th>
+			            <th>Descripción</th>
+			            <th>Precio</th>
+			            <th>Stock</th>
+			            <th>Acciones</th>
+			        </tr>
+			    </thead>
+			    <tbody>
+			        <% 
+			            List<Producto> productos = (List<Producto>) request.getAttribute("productos");
+			            if (productos != null) {
+			                for (Producto p : productos) {
+			        %>
+			        <tr>
+			            <td><%= p.getId() %></td>
+			            <td><%= p.getNombre() %></td>
+			            <td>
+			                <img src="ControllerImg?id=<%= p.getId() %>" alt="<%= p.getNombre() %>" style="max-width: 100px;">
+			            </td>
+			            <td><%= p.getDescripcion() %></td>
+			            <td><%= p.getPrecio() %></td>
+			            <td><%= p.getStock() %></td>
+			            <td>
+			                <form action="Controller" method="post">
+			                    <input type="hidden" name="id" value="<%= p.getId() %>">
+			                    <div class="field is-grouped">
+			                        <div class="control">
+			                            <button class="button is-link" type="submit" name="accion" value="Edit">Edit</button>
+			                        </div>
+			                        <div class="control">
+			                            <button class="button is-light" type="submit" name="accion" value="Delete">Delete</button>
+			                        </div>
+			                    </div>
+			                </form>
+			            </td>
+			        </tr>
+			        <% 
+			                }
+			            }
+			        %>
+			    </tbody>
+			</table>
         </div>
     </div>
+</div>
+    
+    
+<div class="modal" id="addProductModal">
+        <div class="modal-background"></div>
+        <div class="modal-content">
+            <div class="box">
+                <h3 class="title is-4">Agregar Nuevo Producto</h3>
+                <form action="Controller?accion=Guardar" method="post" enctype="multipart/form-data">
+                    <div class="field">
+                        <label class="label">Nombre:</label>
+                        <div class="control">
+                            <input class="input" type="text" name="txtNom" required>
+                        </div>
+                    </div>
+                    <div class="field">
+					    <label class="label">Foto:</label>
+					    <div class="file has-name is-fullwidth">
+					        <label class="file-label">
+					            <input class="file-input" type="file" name="fileFoto" id="fileFoto" required>
+					            <span class="file-cta has-background-warning">
+					                <span class="file-icon">
+					                    <i class="fas fa-upload"></i>
+					                </span>
+					                <span class="file-label">
+					                    Choose a file...
+					                </span>
+					            </span>
+					            <span class="file-name has-background-warning-light">
+					                No file chosen
+					            </span>
+					        </label>
+					    </div>
+					</div>
+                    <div class="field">
+                        <label class="label">Descripción:</label>
+                        <div class="control">
+                            <input class="input" type="text" name="txtDesc" required>
+                        </div>
+                    </div>
+                    <div class="field">
+                        <label class="label">Precio:</label>
+                        <div class="control">
+                            <input class="input" type="text" name="numbPrecio" required>
+                        </div>
+                    </div>
+                    <div class="field">
+                        <label class="label">Stock:</label>
+                        <div class="control">
+                            <input class="input" type="text" name="numbStock" required>
+                        </div>
+                    </div>
+                    <div class="field">
+                    <label class="label">Categoria:</label>
+                    <div class="control">
+                        <input class="input" type="text" name="nomCat" required>
+                    </div>
+                	</div>
+                    <div class="field is-grouped">
+                        <div class="control">
+                            <button class="button is-link" type="submit" name="accion" value="Guardar">Guardar</button>
+                        </div>
+                        <div class="control">
+                            <button class="button is-light" type="button" onclick="closeModal()">Cancelar</button>
+                        </div>
+                    </div>
+                </form>
+            </div>
+        </div>
+        <button class="modal-close is-large" aria-label="close" onclick="closeModal()"></button>
+    </div>
+
+    <script>
+        function openModal() {
+            document.getElementById('addProductModal').classList.add('is-active');
+        }
+
+        function closeModal() {
+            document.getElementById('addProductModal').classList.remove('is-active');
+        }
+        
+        document.addEventListener('DOMContentLoaded', (event) => {
+            const fileInput = document.getElementById('fileFoto');
+            fileInput.onchange = () => {
+                if (fileInput.files.length > 0) {
+                    const fileName = document.querySelector('.file-name');
+                    fileName.textContent = fileInput.files[0].name;
+                }
+            }
+        });
+    </script>
+    
+    
 </body>
-</html>
+</html>    
+  
+

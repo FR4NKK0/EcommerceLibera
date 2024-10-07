@@ -59,20 +59,27 @@ public class DataProducto {
 	    try {
 	        // Obtener el OutputStream de la respuesta
 	        outputStream = response.getOutputStream();
+	        
 
 	        // Crear el PreparedStatement con la consulta SQL
 	        stmt = DbConnector.getInstancia().getConn().prepareStatement(
 	                "SELECT foto FROM producto WHERE id = ?");
+	        
 
 	        // Establecer el valor del parámetro
 	        stmt.setInt(1, id);
+	        
 
 	        // Ejecutar la consulta
 	        rs = stmt.executeQuery();
+	        
 
 	        // Procesar el ResultSet
-	        if (rs.next()) {
+	        if (rs != null && rs.next()) {
+	            
 	            inputStream = rs.getBinaryStream("foto");
+	        } else {
+	            System.out.println("No se encontraron datos para el ID proporcionado.");
 	        }
 
 	        // Asegurarse de que el inputStream no sea nulo antes de continuar
@@ -80,30 +87,51 @@ public class DataProducto {
 	            bufferedInputStream = new BufferedInputStream(inputStream);
 	            bufferedOutputStream = new BufferedOutputStream(outputStream);
 	            int i;
+	           
 	            while ((i = bufferedInputStream.read()) != -1) {
 	                bufferedOutputStream.write(i);
 	            }
+	            
 	        } else {
+	            System.out.println("InputStream es nulo, enviando error 404.");
 	            response.sendError(HttpServletResponse.SC_NOT_FOUND); // Imagen no encontrada
 	        }
 	        
 	    } catch (Exception e) {
+	        System.err.println("Error al listar la imagen del producto: " + e.getMessage());
 	        e.printStackTrace();
 
 	    } finally {
 	        try {
-	            if (rs != null) rs.close();
-	            if (stmt != null) stmt.close();
-	            if (bufferedInputStream != null) bufferedInputStream.close();
-	            if (bufferedOutputStream != null) bufferedOutputStream.close();
+	            // Cerrar recursos si no son nulos
+	            if (rs != null) {
+	                rs.close();
+	                
+	            }
+	            if (stmt != null) {
+	                stmt.close();
+	                
+	            }
+	            if (bufferedInputStream != null) {
+	                bufferedInputStream.close();
+	                
+	            }
+	            if (bufferedOutputStream != null) {
+	                bufferedOutputStream.close();
+	                
+	            }
 	            DbConnector.getInstancia().releaseConn();
+	            System.out.println("Conexión liberada.");
 	        } catch (SQLException e) {
+	            System.err.println("Error al cerrar recursos de la base de datos: " + e.getMessage());
 	            e.printStackTrace();
 	        } catch (IOException e) {
+	            System.err.println("Error al cerrar streams: " + e.getMessage());
 	            e.printStackTrace();
 	        }
 	    }
 	}
+
 
 	
 	public Producto getById(int id) {

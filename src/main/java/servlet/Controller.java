@@ -71,14 +71,79 @@ public class Controller extends HttpServlet {
 				request.setAttribute("productos", productos);
 				request.getRequestDispatcher("prodcutosCRUD.jsp").forward(request, response);
 				break;
-			case "Nuevo":
+			case "ListarCatalogo":
+				List<Producto> catalogo=dp.getAll();
+				request.setAttribute("productos", catalogo);
+				request.getRequestDispatcher("index.jsp").forward(request, response);
+				break;
+			case "Delete":
 	            // Redirigir a productosCRUD.jsp
 	            request.getRequestDispatcher("prodcutosCRUD.jsp").forward(request, response);
 	            
 	            break;
+			case "Edit":
+				try {
+                    int id = Integer.parseInt(request.getParameter("id"));
+                    Producto producto = dp.getById(id);
+                    if (producto != null) {
+                        request.setAttribute("producto", producto);
+                        request.getRequestDispatcher("editarProducto.jsp").forward(request, response);
+                    } else {
+                        request.setAttribute("error", "Producto no encontrado.");
+                        request.getRequestDispatcher("prodcutosCRUD.jsp").forward(request, response);
+                    }
+                } catch (NumberFormatException e) {
+                    request.setAttribute("error", "ID de producto inválido.");
+                    request.getRequestDispatcher("prodcutosCRUD.jsp").forward(request, response);
+                } catch (Exception e) {
+                    e.printStackTrace();
+                    request.setAttribute("error", "Error al procesar la solicitud de edición.");
+                    request.getRequestDispatcher("prodcutosCRUD.jsp").forward(request, response);
+                }
+                break;
+			case "ActualizarProducto":
+				try {
+                    int idProducto = Integer.parseInt(request.getParameter("id"));
+                    String nombre = request.getParameter("txtNom");
+                    String descripcion = request.getParameter("txtDesc");
+                    double precio = Double.parseDouble(request.getParameter("numbPrecio"));
+                    int stock = Integer.parseInt(request.getParameter("numbStock"));
+                    String nombreCat = request.getParameter("nomCat");
+
+                    Producto productoActualizar = dp.getById(idProducto);
+                    productoActualizar.setNombre(nombre);
+                    productoActualizar.setDescripcion(descripcion);
+                    productoActualizar.setPrecio(precio);
+                    productoActualizar.setStock(stock);
+
+                    Categoria cat = dc.getByName(nombreCat);
+                    if (cat != null) {
+                        productoActualizar.setCat(cat);
+                    }
+
+                    Part filePart = request.getPart("fileFoto");
+                    if (filePart != null && filePart.getSize() > 0) {
+                        if (filePart.getContentType().startsWith("image/")) {
+                            InputStream inputStream = filePart.getInputStream();
+                            productoActualizar.setFoto(inputStream);
+                        } else {
+                            request.setAttribute("error", "Por favor, sube solo archivos de imagen.");
+                            request.getRequestDispatcher("editarProducto.jsp").forward(request, response);
+                            return;
+                        }
+                    }
+
+                    dp.update(productoActualizar);
+                    request.getRequestDispatcher("prodcutosCRUD.jsp").forward(request, response);
+                    
+                } catch (Exception e) {
+                    e.printStackTrace();
+                    request.setAttribute("error", "Ocurrió un error al actualizar el producto.");
+                    request.getRequestDispatcher("editarProducto.jsp").forward(request, response);
+                }
+                break;
 			case "Guardar":
 				try {
-					System.out.println("Entre a guardar");
                     // Obtener los parámetros del formulario
                     String nom = request.getParameter("txtNom");
 
@@ -88,11 +153,14 @@ public class Controller extends HttpServlet {
                     String desc = request.getParameter("txtDesc");
                     double precio = Double.parseDouble(request.getParameter("numbPrecio"));
                     int stock = Integer.parseInt(request.getParameter("numbStock"));
-                    int idcat = Integer.parseInt(request.getParameter("idCat"));
+                    String nombreCat = request.getParameter("nomCat");
+                    //int idcat = Integer.parseInt(request.getParameter("idCat"));
 
                     Categoria cat = new Categoria();
-                    cat.setId(idcat);
-
+                    cat.setNombre(nombreCat);
+                    cat= dc.getByName(cat.getNombre());
+                    
+                    if (cat != null) {
                     Producto p = new Producto();
                     p.setNombre(nom);
                     p.setFoto(inputStream);
@@ -105,7 +173,8 @@ public class Controller extends HttpServlet {
                     dp.add(p);
                     // Redirigir después de guardar
                     
-                    request.getRequestDispatcher("Controller?accion=Listar").forward(request, response);
+                    request.getRequestDispatcher("Controller?accion=Listar").forward(request, response);}
+                    else {response.sendRedirect("error.jsp");}
                 } catch (Exception e) {
                     e.printStackTrace();
                     response.sendRedirect("error.jsp"); // Página de error si algo falla
@@ -127,7 +196,7 @@ public class Controller extends HttpServlet {
 		
 		}
 		} else {
-			System.out.println("accion es null");
+			accion = "ListarCatalogo";
 		}
 	}
 

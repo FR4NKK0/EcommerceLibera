@@ -1,5 +1,7 @@
 <%@ page language="java" contentType="text/html; charset=ISO-8859-1"
     pageEncoding="ISO-8859-1"%>
+<%@ page import="entities.*" %>
+<%@ page import="java.util.*" %>
 
 <!DOCTYPE html>
 <html>
@@ -89,7 +91,7 @@
                         </a>
                         <form action="Controller" method="post">
                             <div class="control">
-                                <button type="submit" name="accion" value="Nuevo" class="button is-danger">Management</button>
+                                <button type="submit" name="accion" value="Listar" class="button is-danger">Management</button>
                             </div>
                         </form>
                     </div>
@@ -97,33 +99,62 @@
             </div>
         </div>
     </nav>
-    <div class="container mt-4">
-        <div class="columns is-multiline">
-            <div class="column is-one-third">
-                <div class="card">
-                    <header class="card-header">
-                        <p class="card-header-title"><label></label></p>
-                    </header>
-                    <div class="card-content">
-                        <div class="content">
-                            <p><i></i></p>
-                            <figure class="image is-4by3">
-                                <img src="ControllerImg?id=" alt="Producto">
-                            </figure>
+    <section class="section">
+        <div class="container">
+            <h1 class="title">Catálogo de Productos</h1>
+            
+            <div class="container mt-4">
+                <div class="columns is-multiline">
+                    <% 
+                    List<Producto> productos = (List<Producto>) request.getAttribute("productos");
+                    if (productos != null && !productos.isEmpty()) {
+                        for (Producto producto : productos) {
+                    %>
+                    <div class="column is-one-third">
+                        <div class="card">
+                            <header class="card-header">
+                                <p class="card-header-title">
+                                    <label><%= producto.getNombre() %></label>
+                                </p>
+                            </header>
+                            <div class="card-content">
+                                <div class="content">
+                                    <p><i><%= producto.getDescripcion() %></i></p>
+                                    <figure class="image is-4by3">
+                                        <img src="ControllerImg?id=<%= producto.getId() %>" alt="<%= producto.getNombre() %>">
+                                    </figure>
+                                </div>
+                            </div>
+                            <footer class="card-footer">
+                                <p class="card-footer-item">
+                                    Precio: $<%= String.format("%.2f", producto.getPrecio()) %> | Stock: <%= producto.getStock() %>
+                                </p>
+                            </footer>
+                            <div class="card-footer">
+                                <a href="Controller?accion=AgregarCarrito&id=<%= producto.getId() %>" class="card-footer-item button is-info">Agregar a carrito</a>
+                                <a href="Controller?accion=ComprarAhora&id=<%= producto.getId() %>" class="card-footer-item button is-danger">Comprar</a>
+                            </div>
                         </div>
                     </div>
-                    <footer class="card-footer">
-                        <p class="card-footer-item">
-                            
-                        </p>
-                        <div class="card-footer">
-                            <a href="#" class="card-footer-item button is-info">Agregar a carrito</a>
-                            <a href="#" class="card-footer-item button is-danger">Comprar</a>
-                        </div>
-                    </footer>
+                    <%
+                        }
+                    } else {
+                    %>
+                    <div class="column">
+                        <p class="has-text-centered">No hay productos disponibles en este momento.</p>
+                    </div>
+                    <%
+                    }
+                    %>
                 </div>
             </div>
         </div>
-    </div>
+    </section>
+
+    <% if (request.getAttribute("error") != null) { %>
+        <div class="notification is-danger">
+            <%= request.getAttribute("error") %>
+        </div>
+    <% } %>
 </body>
 </html>
