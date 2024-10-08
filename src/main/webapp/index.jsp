@@ -24,9 +24,9 @@
 <body>
     <nav class="navbar has-shadow is-spaced is-warning" role="navigation" aria-label="main navigation">
         <div class="navbar-brand">
-            <a class="navbar-item" href="index.jsp">
-                <img src="style/iconcarrito.png" alt="Home" class="logo-image">
-            </a>
+            <a class="navbar-item" href="Controller?accion=ListarCatalogo" >
+			    <img src="style/iconcarrito.png" alt="Home" class="logo-image">
+			</a>
 
             <a role="button" class="navbar-burger" aria-label="menu" aria-expanded="false" data-target="navbarBasicExample">
                 <span aria-hidden="true"></span>
@@ -99,57 +99,56 @@
             </div>
         </div>
     </nav>
-    <section class="section">
-        <div class="container">
-            <h1 class="title">Catálogo de Productos</h1>
-            
-            <div class="container mt-4">
-                <div class="columns is-multiline">
-                    <% 
-                    List<Producto> productos = (List<Producto>) request.getAttribute("productos");
-                    if (productos != null && !productos.isEmpty()) {
-                        for (Producto producto : productos) {
-                    %>
-                    <div class="column is-one-third">
-                        <div class="card">
-                            <header class="card-header">
-                                <p class="card-header-title">
-                                    <label><%= producto.getNombre() %></label>
-                                </p>
-                            </header>
-                            <div class="card-content">
-                                <div class="content">
-                                    <p><i><%= producto.getDescripcion() %></i></p>
-                                    <figure class="image is-4by3">
-                                        <img src="ControllerImg?id=<%= producto.getId() %>" alt="<%= producto.getNombre() %>">
-                                    </figure>
-                                </div>
-                            </div>
-                            <footer class="card-footer">
-                                <p class="card-footer-item">
-                                    Precio: $<%= String.format("%.2f", producto.getPrecio()) %> | Stock: <%= producto.getStock() %>
-                                </p>
-                            </footer>
-                            <div class="card-footer">
-                                <a href="Controller?accion=AgregarCarrito&id=<%= producto.getId() %>" class="card-footer-item button is-info">Agregar a carrito</a>
-                                <a href="Controller?accion=ComprarAhora&id=<%= producto.getId() %>" class="card-footer-item button is-danger">Comprar</a>
-                            </div>
-                        </div>
-                    </div>
-                    <%
-                        }
-                    } else {
-                    %>
-                    <div class="column">
-                        <p class="has-text-centered">No hay productos disponibles en este momento.</p>
-                    </div>
-                    <%
-                    }
-                    %>
-                </div>
-            </div>
-        </div>
-    </section>
+   <section class="section">
+	  <div class="container">
+	    <h1 class="title">Catálogo de Productos</h1>
+	    <div class="container mt-4">
+	      <div class="columns is-multiline">
+	        <% 
+	        List<Producto> catalogo = (List<Producto>) request.getAttribute("productos");
+	        if (catalogo != null && !catalogo.isEmpty()) {
+	          for (Producto p : catalogo) {
+	        %>
+	        <div class="column is-one-third">
+	          <div class="card">
+	            <header class="card-header">
+	              <p class="card-header-title">
+	                <%= p.getNombre() %>
+	              </p>
+	            </header>
+	            <div class="card-content">
+	              <div class="content">
+	                <p class="is-italic has-text-weight-bold is-size-4 mb-2">$<%= String.format("%.2f", p.getPrecio()) %></p>
+	                <figure class="image is-4by3">
+	                  <img src="ControllerImg?id=<%= p.getId() %>" alt="<%= p.getNombre() %>">
+	                </figure>
+	              </div>
+	            </div>
+	            <footer class="card-footer">
+	              <div class="card-footer-item is-flex is-flex-direction-column is-align-items-flex-start">
+	                <p class="mb-2"><%= p.getDescripcion() %></p>
+	                <div class="buttons">
+	                  <a href="Controller?accion=AgregarCarrito&id=<%= p.getId() %>" class="button is-info is-outlined">Agregar al carrito</a>
+	                  <a href="Controller?accion=ComprarAhora&id=<%= p.getId() %>" class="button is-danger">Comprar</a>
+	                </div>
+	              </div>
+	            </footer>
+	          </div>
+	        </div>
+	        <% 
+	          }
+	        } else {
+	        %>
+	        <div class="column">
+	          <p class="has-text-centered">No hay productos disponibles en este momento.</p>
+	        </div>
+	        <%
+	        }
+	        %>
+	      </div>
+	    </div>
+	  </div>
+	</section>
 
     <% if (request.getAttribute("error") != null) { %>
         <div class="notification is-danger">
