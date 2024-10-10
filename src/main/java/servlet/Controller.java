@@ -20,6 +20,11 @@ public class Controller extends HttpServlet {
        
     private DataProducto dp = new DataProducto();
     private DataCategoria dc = new DataCategoria();
+    private List<Carrito> listaCarrito = new ArrayList<>();
+    int item;
+    double totalPagar=0.0;
+    int cantidad = 1;
+    
 
     public Controller() {
         super();
@@ -61,6 +66,12 @@ public class Controller extends HttpServlet {
             case "Delete":
                 eliminarProducto(request, response);
                 break;
+            case "AgregarCarrito":
+            	agregarCarrito(request, response);
+            	break;
+            case "Carrito":
+            	
+            	break;
             default:
                 listarCatalogo(request, response);
                 break;
@@ -171,7 +182,29 @@ public class Controller extends HttpServlet {
             response.sendRedirect("error.jsp");
         }
     }
-
+    
+    private void agregarCarrito(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
+    	try {
+    		int idp=Integer.parseInt(request.getParameter("id"));
+    		Producto p = new Producto();
+    		p=dp.getById(idp);
+    		item=item+1;
+    		Carrito car=new Carrito();
+    		car.setItem(item);
+    		car.setIdProducto(p.getId());
+    		car.setNombres(p.getNombre());
+    		car.setDescripcion(p.getDescripcion());
+    		car.setPrecioCompra(p.getPrecio());
+    		car.setCantidad(cantidad);
+    		car.setSubTotal(cantidad*p.getPrecio());
+    		listaCarrito.add(car);
+    		request.setAttribute("contador", listaCarrito.size());
+    		request.getRequestDispatcher("Controller?accion=ListarCatalogo").forward(request, response);
+    	}catch(Exception e){
+    		
+    	}
+    }
+    
     private void eliminarProducto(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
         // Implementar lógica de eliminación aquí
         listarProductos(request, response);

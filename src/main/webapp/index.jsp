@@ -84,10 +84,10 @@
                         <a class="button is-light">
                             Log in
                         </a>
-                        <a class="button is-light">
-                            <span class="icon">
-                                <i class="fas fa-shopping-cart"></i>
-                            </span>
+                        <a class="nav-link button is-light">
+                        	<i class="fas fa-cart-plus">
+                        	(<label style= "color: orange"> ${contador} </label>)</i>Carrito
+                            
                         </a>
                         <form action="Controller" method="post">
                             <div class="control">
