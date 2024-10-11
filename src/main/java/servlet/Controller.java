@@ -70,7 +70,7 @@ public class Controller extends HttpServlet {
             	agregarCarrito(request, response);
             	break;
             case "Carrito":
-            	
+            	carritoDeCompras(request, response);
             	break;
             default:
                 listarCatalogo(request, response);
@@ -197,7 +197,7 @@ public class Controller extends HttpServlet {
     		car.setPrecioCompra(p.getPrecio());
     		car.setCantidad(cantidad);
     		car.setSubTotal(cantidad*p.getPrecio());
-    		listaCarrito.add(car);
+    		listaCarrito.add(car);    	
     		request.setAttribute("contador", listaCarrito.size());
     		request.getRequestDispatcher("Controller?accion=ListarCatalogo").forward(request, response);
     	}catch(Exception e){
@@ -205,6 +205,19 @@ public class Controller extends HttpServlet {
     	}
     }
     
+    private void carritoDeCompras(HttpServletRequest request, HttpServletResponse response)throws ServletException, IOException {
+    	try {
+    		totalPagar=0.0;
+    		request.setAttribute("carrito", listaCarrito);
+    		for (int i =0; i<listaCarrito.size();i++) {
+    			totalPagar=totalPagar+ listaCarrito.get(i).getSubTotal();
+    		}
+    		request.setAttribute("totalPagar", totalPagar);
+    		request.getRequestDispatcher("carrito.jsp").forward(request, response);
+    	}catch(Exception e) {
+    		
+    	}
+    }
     private void eliminarProducto(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
         // Implementar lógica de eliminación aquí
         listarProductos(request, response);

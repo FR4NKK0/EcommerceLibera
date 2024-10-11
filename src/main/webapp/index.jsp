@@ -84,10 +84,9 @@
                         <a class="button is-light">
                             Log in
                         </a>
-                        <a class="nav-link button is-light">
+                        <a class="nav-link button is-light" href="Controller?accion=Carrito">
                         	<i class="fas fa-cart-plus">
-                        	(<label style= "color: orange"> ${contador} </label>)</i>Carrito
-                            
+                        	(<label style= "color: orange"> ${contador} </label>)</i>Carrito                          
                         </a>
                         <form action="Controller" method="post">
                             <div class="control">
