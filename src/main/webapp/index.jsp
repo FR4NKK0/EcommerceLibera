@@ -24,12 +24,10 @@
 <body>
     <nav class="navbar has-shadow is-spaced is-warning" role="navigation" aria-label="main navigation">
         <div class="navbar-brand">
-            <a class="navbar-item" href="Controller?accion=ListarCatalogo" >
-			    <img src="style/iconcarrito.png" alt="Home" class="logo-image">
-			</a>
-
+            <a class="navbar-item" href="Controller?accion=ListarCatalogo">
+                <img src="style/iconcarrito.png" alt="Home" class="logo-image">
+            </a>
             <a role="button" class="navbar-burger" aria-label="menu" aria-expanded="false" data-target="navbarBasicExample">
-                <span aria-hidden="true"></span>
                 <span aria-hidden="true"></span>
                 <span aria-hidden="true"></span>
                 <span aria-hidden="true"></span>
@@ -41,7 +39,6 @@
                 <a class="navbar-item">
                     Ofertas del Día
                 </a>
-              
                 <div class="navbar-item">
                     <form>
                         <div class="control has-icons-left">
@@ -52,41 +49,20 @@
                         </div>
                     </form>
                 </div>
-                <div class="navbar-item has-dropdown is-hoverable">
-                    <a class="navbar-link">
-                        More
-                    </a>
-
-                    <div class="navbar-dropdown">
-                        <a class="navbar-item">
-                            About
-                        </a>
-                        <a class="navbar-item is-selected">
-                            Jobs
-                        </a>
-                        <a class="navbar-item">
-                            Contact
-                        </a>
-                        <hr class="navbar-divider">
-                        <a class="navbar-item">
-                            Report an issue
-                        </a>
-                    </div>
-                </div>
             </div>
 
             <div class="navbar-end">
                 <div class="navbar-item">
                     <div class="buttons">
-                        <a class="button is-primary">
+                        <a class="button is-primary" id="btn-signup">
                             <strong>Sign up</strong>
                         </a>
                         <a class="button is-light">
                             Log in
                         </a>
                         <a class="nav-link button is-light" href="Controller?accion=Carrito">
-                        	<i class="fas fa-cart-plus">
-                        	(<label style= "color: orange"> ${contador} </label>)</i>Carrito                          
+                            <i class="fas fa-cart-plus">
+                            (<label style="color: orange"> ${contador} </label>)</i>Carrito                          
                         </a>
                         <form action="Controller" method="post">
                             <div class="control">
@@ -148,12 +124,127 @@
 	    </div>
 	  </div>
 	</section>
+	
+	
 
     <% if (request.getAttribute("error") != null) { %>
         <div class="notification is-danger">
             <%= request.getAttribute("error") %>
         </div>
     <% } %>
+    
+    <div class="modal" id="modal-register">
+        <div class="modal-background"></div>
+        <div class="modal-card">
+            <header class="modal-card-head">
+                <p class="modal-card-title">Registrar Persona</p>
+                <button class="delete" aria-label="close" id="btn-close"></button>
+            </header>
+            <section class="modal-card-body">
+                <form action="Controller?accion=Registrar" method="post" enctype="form-data">
+                    <div class="field">
+                        <label class="label">Tipo de Documento</label>
+                        <div class="control">
+                            <div class="select">
+                                <select name="tipo_doc">
+                                    <option value="dni">DNI</option>
+                                    <option value="cuit">CUIT</option>
+                                </select>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="field">
+                        <label class="label">Número de Documento</label>
+                        <div class="control">
+                            <input class="input" type="text" name="numero_doc" placeholder="Número de documento" required>
+                        </div>
+                    </div>
+                    <div class="field">
+                        <label class="label">Nombre</label>
+                        <div class="control">
+                            <input class="input" type="text" name="nombre" placeholder="Nombre" required>
+                        </div>
+                    </div>
+                    <div class="field">
+                        <label class="label">Apellido</label>
+                        <div class="control">
+                            <input class="input" type="text" name="apellido" placeholder="Apellido" required>
+                        </div>
+                    </div>
+                    <div class="field">
+                        <label class="label">Email</label>
+                        <div class="control">
+                            <input class="input" type="email" name="email" placeholder="Email" required>
+                        </div>
+                    </div>
+                    <div class="field">
+                        <label class="label">Teléfono</label>
+                        <div class="control">
+                            <input class="input" type="text" name="telefono" placeholder="Teléfono" required>
+                        </div>
+                    </div>
+                    <div class="field">
+                        <label class="label">Contraseña</label>
+                        <div class="control">
+                            <input class="input" type="password" id="password" name="password" placeholder="Contraseña" required>
+                        </div>
+                    </div>
+                    <div class="field">
+                        <label class="label">Confirmar Contraseña</label>
+                        <div class="control">
+                            <input class="input" type="password" id="confirm-password" placeholder="Confirmar contraseña" required>
+                        </div>
+                        <p class="help is-danger" id="password-error" style="display: none;">Las contraseñas no coinciden</p>
+                    </div>                   
+                    <div class="field is-grouped">
+                        <div class="control">
+                            <button type="submit" class="button is-link">Registrar</button>
+                        </div>
+                        <div class="control">
+                            <button type="button" class="button is-light" id="btn-cancel">Cancelar</button>
+                        </div>
+                    </div>
+                </form>
+            </section>
+        </div>
+    </div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            const modal = document.getElementById('modal-register');
+            const btnSignUp = document.getElementById('btn-signup');
+            const btnClose = document.getElementById('btn-close');
+            const btnCancel = document.getElementById('btn-cancel');
+            const form = document.getElementById('register-form');
+            const password = document.getElementById('password');
+            const confirmPassword = document.getElementById('confirm-password');
+            const passwordError = document.getElementById('password-error');
+
+            // Abrir modal
+            btnSignUp.addEventListener('click', () => {
+                modal.classList.add('is-active');
+            });
+
+            // Cerrar modal
+            btnClose.addEventListener('click', () => {
+                modal.classList.remove('is-active');
+            });
+
+            btnCancel.addEventListener('click', () => {
+                modal.classList.remove('is-active');
+            });
+
+            // Validar que las contraseñas coincidan antes de enviar el formulario
+            form.addEventListener('submit', (e) => {
+                if (password.value !== confirmPassword.value) {
+                    e.preventDefault();
+                    passwordError.style.display = 'block';
+                } else {
+                    passwordError.style.display = 'none';
+                }
+            });
+        });
+    </script>
     
     <script>
         document.addEventListener('DOMContentLoaded', () => {

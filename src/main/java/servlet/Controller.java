@@ -7,6 +7,8 @@ import jakarta.servlet.http.HttpServlet;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import jakarta.servlet.http.Part;
+import logic.FechaHoy;
+
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.*;
@@ -17,7 +19,9 @@ import data.*;
 @MultipartConfig
 public class Controller extends HttpServlet {
     private static final long serialVersionUID = 1L;
-       
+    
+    private Persona persona= new Persona();
+    private DataPersona personaDAO=new DataPersona();
     private DataProducto dp = new DataProducto();
     private DataCategoria dc = new DataCategoria();
     private List<Carrito> listaCarrito = new ArrayList<>();
@@ -66,23 +70,22 @@ public class Controller extends HttpServlet {
                 guardarProducto(request, response);
                 break;
             case "Delete":
-                int idproducto=Integer.parseInt(request.getParameter("idp"));
-                for (int i=0; i<listaCarrito.size(); i++) {
-                	if(listaCarrito.get(i).getIdProducto()==idproducto) {
-                		listaCarrito.remove(i);
-                	}
-                }
-                response.setContentType("text/plain");
-                response.getWriter().write("Producto eliminado con éxito");
+            	deleteItemCarrito(request, response);
                 break;
             case "ActualizarCantidad":
             	actualizarCantidad(request,response);
             	break;
+            case "Registrar":
+            	registerForm(request, response);
+                break;
             case "AgregarCarrito":
             	agregarCarrito(request, response);
             	break;
             case "Carrito":
             	carritoDeCompras(request, response);
+            	break;
+            case "GenerarCompra":
+            	generarCompra(request,response);
             	break;
             case "ComprarAhora":
             	comprarAhora(request, response);
@@ -92,7 +95,66 @@ public class Controller extends HttpServlet {
         }
     }
 
-    private void listarCatalogo(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
+    private void generarCompra(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException{
+    	Persona persona=new Persona();
+    	Pago pago=new Pago();
+    	DataCompra dc = new DataCompra();
+    	Compra compra = new Compra(persona, pago.getId(), FechaHoy.FechaBD(),pago.getMonto(),"Cancelado", listaCarrito);
+		int res=dc.GenerarCompra(compra);
+		if(res!=0&&totalPagar>0) {
+			request.getRequestDispatcher("mensaje.jsp").forward(request, response);
+			
+		}else {
+			request.getRequestDispatcher("error.jsp").forward(request, response);
+		}
+    }
+    
+	private void registerForm(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException{
+		Rol rol = new Rol();
+    	rol.setId(2);
+    	String tipoDoc = request.getParameter("tipo_doc");
+        String numeroDoc = request.getParameter("numero_doc");
+        String nombre = request.getParameter("nombre");
+        String apellido = request.getParameter("apellido");
+        String email = request.getParameter("email");
+        String telefono = request.getParameter("telefono");
+        String password = request.getParameter("password");
+        Documento doc= new Documento();
+        doc.setNro(numeroDoc);
+        doc.setTipo(tipoDoc);
+        
+        Persona persona = new Persona();
+        try {
+            persona.setDocumento(doc);
+            persona.setNombre(nombre);
+            persona.setApellido(apellido);
+            persona.setEmail(email);
+            persona.setTel(telefono);
+            persona.setPassword(password);
+            persona.setHabilitado(false);
+            persona.addRol(rol);
+            personaDAO.add(persona);
+            request.setAttribute("mensaje", "Registro exitoso");
+            request.getRequestDispatcher("Controller?accion=ListarCatalogo").forward(request, response);
+        }catch(Exception e) {
+        	e.printStackTrace();
+            request.setAttribute("mensajeError", "Ocurrió un error durante el registro");
+        }
+	}
+    	
+	private void deleteItemCarrito(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
+		int idproducto=Integer.parseInt(request.getParameter("idp"));
+        for (int i=0; i<listaCarrito.size(); i++) {
+        	if(listaCarrito.get(i).getIdProducto()==idproducto) {
+        		listaCarrito.remove(i);
+        	}
+        }
+        response.setContentType("text/plain");
+        response.getWriter().write("Producto eliminado con éxito");
+
+	}
+
+	private void listarCatalogo(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
         List<Producto> catalogo = dp.getAll();
         request.setAttribute("productos", catalogo);
         request.getRequestDispatcher("index.jsp").forward(request, response);
