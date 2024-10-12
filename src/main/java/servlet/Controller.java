@@ -24,6 +24,8 @@ public class Controller extends HttpServlet {
     int item;
     double totalPagar=0.0;
     int cantidad = 1;
+    int idp;
+    Carrito car;
     
 
     public Controller() {
@@ -64,14 +66,26 @@ public class Controller extends HttpServlet {
                 guardarProducto(request, response);
                 break;
             case "Delete":
-                eliminarProducto(request, response);
+                int idproducto=Integer.parseInt(request.getParameter("idp"));
+                for (int i=0; i<listaCarrito.size(); i++) {
+                	if(listaCarrito.get(i).getIdProducto()==idproducto) {
+                		listaCarrito.remove(i);
+                	}
+                }
+                response.setContentType("text/plain");
+                response.getWriter().write("Producto eliminado con éxito");
                 break;
+            case "ActualizarCantidad":
+            	actualizarCantidad(request,response);
+            	break;
             case "AgregarCarrito":
             	agregarCarrito(request, response);
             	break;
             case "Carrito":
             	carritoDeCompras(request, response);
             	break;
+            case "ComprarAhora":
+            	comprarAhora(request, response);
             default:
                 listarCatalogo(request, response);
                 break;
@@ -185,23 +199,51 @@ public class Controller extends HttpServlet {
     
     private void agregarCarrito(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
     	try {
+    		int pos=0;
+    		cantidad=1;
     		int idp=Integer.parseInt(request.getParameter("id"));
     		Producto p = new Producto();
     		p=dp.getById(idp);
-    		item=item+1;
-    		Carrito car=new Carrito();
-    		car.setItem(item);
-    		car.setIdProducto(p.getId());
-    		car.setNombres(p.getNombre());
-    		car.setDescripcion(p.getDescripcion());
-    		car.setPrecioCompra(p.getPrecio());
-    		car.setCantidad(cantidad);
-    		car.setSubTotal(cantidad*p.getPrecio());
-    		listaCarrito.add(car);    	
+    		if(listaCarrito.size()>0) {
+    			for(int i = 0; i<listaCarrito.size();i++) {
+    				if(idp==listaCarrito.get(i).getIdProducto()) {
+    					pos=i;    					
+    				}
+    			}
+    			if(idp==listaCarrito.get(pos).getIdProducto()) {
+    				cantidad=listaCarrito.get(pos).getCantidad()+cantidad;
+    				double subtotal=listaCarrito.get(pos).getPrecioCompra()*cantidad;
+    				listaCarrito.get(pos).setCantidad(cantidad);
+    				listaCarrito.get(pos).setSubTotal(subtotal);
+    			} else {
+    				item=item+1;
+    	    		Carrito car=new Carrito();
+    	    		car.setItem(item);
+    	    		car.setIdProducto(p.getId());
+    	    		car.setNombres(p.getNombre());
+    	    		car.setDescripcion(p.getDescripcion());
+    	    		car.setPrecioCompra(p.getPrecio());
+    	    		car.setCantidad(cantidad);
+    	    		car.setSubTotal(cantidad*p.getPrecio());
+    	    		listaCarrito.add(car);
+    			}
+    		}else {
+	    		item=item+1;
+	    		Carrito car=new Carrito();
+	    		car.setItem(item);
+	    		car.setIdProducto(p.getId());
+	    		car.setNombres(p.getNombre());
+	    		car.setDescripcion(p.getDescripcion());
+	    		car.setPrecioCompra(p.getPrecio());
+	    		car.setCantidad(cantidad);
+	    		car.setSubTotal(cantidad*p.getPrecio());
+	    		listaCarrito.add(car);}
+    		
     		request.setAttribute("contador", listaCarrito.size());
     		request.getRequestDispatcher("Controller?accion=ListarCatalogo").forward(request, response);
     	}catch(Exception e){
-    		
+    		e.printStackTrace();
+            response.sendRedirect("error.jsp");
     	}
     }
     
@@ -215,9 +257,55 @@ public class Controller extends HttpServlet {
     		request.setAttribute("totalPagar", totalPagar);
     		request.getRequestDispatcher("carrito.jsp").forward(request, response);
     	}catch(Exception e) {
-    		
+    		e.printStackTrace();
+            response.sendRedirect("error.jsp");
     	}
     }
+    
+    private void comprarAhora(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
+    	try {
+    		totalPagar=0.0;
+    		int idp=Integer.parseInt(request.getParameter("id"));
+    		Producto p = new Producto();
+    		p=dp.getById(idp);
+    		item=item+1;
+    		Carrito car=new Carrito();
+    		car.setItem(item);
+    		car.setIdProducto(p.getId());
+    		car.setNombres(p.getNombre());
+    		car.setDescripcion(p.getDescripcion());
+    		car.setPrecioCompra(p.getPrecio());
+    		car.setCantidad(cantidad);
+    		car.setSubTotal(cantidad*p.getPrecio());
+    		listaCarrito.add(car);
+    		for (int i =0; i<listaCarrito.size();i++) {
+    			totalPagar=totalPagar+ listaCarrito.get(i).getSubTotal();
+    		}
+    		request.setAttribute("totalPagar", totalPagar);
+    		request.setAttribute("carrito", listaCarrito);
+    		request.setAttribute("contador", listaCarrito.size());
+    		request.getRequestDispatcher("carrito.jsp").forward(request, response);
+    	}catch(Exception e){
+    		e.printStackTrace();
+            response.sendRedirect("error.jsp");
+    	}
+    }
+    
+    private void actualizarCantidad(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
+    	int idpro=Integer.parseInt(request.getParameter("idpro"));
+    	int cant=Integer.parseInt(request.getParameter("Cantidad"));
+    	for (int i =0; i<listaCarrito.size();i++) {
+			if(listaCarrito.get(i).getIdProducto()==idpro) {
+				listaCarrito.get(i).setCantidad(cant);
+				double st=listaCarrito.get(i).getCantidad()*listaCarrito.get(i).getPrecioCompra();
+				listaCarrito.get(i).setSubTotal(st);
+			}
+				
+		}
+    	
+    	
+    }
+    
     private void eliminarProducto(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
         // Implementar lógica de eliminación aquí
         listarProductos(request, response);

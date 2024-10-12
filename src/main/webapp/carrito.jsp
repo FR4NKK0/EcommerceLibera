@@ -1,6 +1,6 @@
 <%@ page language="java" contentType="text/html; charset=ISO-8859-1"
     pageEncoding="ISO-8859-1"%>
-<%@ page import="entities.*" %>
+<%@ page import="entities.*" %><%@ page import="data.*" %>
 <%@ page import="java.util.*" %>
 <!DOCTYPE html>
 <html>
@@ -9,7 +9,7 @@
     <title>Carrito de compras</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css" integrity="sha384-k6RqeWeci5ZR/Lv4MR0sA0FfDOMm2JgX/aTk5lZeg6MOc1pYNeZTk5cBz6QeV6y" crossorigin="anonymous">
     <link rel="stylesheet" type="text/css" href="style/bulma.css">
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">    
     <style>
         .product-image {
             width: 100px;
@@ -118,6 +118,8 @@
                         <tbody>
                             <%
                             List<Carrito> listaCarrito = (List<Carrito>)request.getAttribute("carrito");
+                            
+                            
                             if (listaCarrito != null && !listaCarrito.isEmpty()) {
                                 for (Carrito c : listaCarrito) {
                             %>
@@ -128,21 +130,24 @@
                                     <img src="ControllerImg?id=<%=c.getIdProducto() %>" width="100" height="100"> 
                                     </td>
                                     <td>$<%= String.format("%.2f", c.getPrecioCompra()) %></td>
-                                    <td><%= c.getCantidad() %></td>
-                                    <td>$<%= String.format("%.2f", c.getSubTotal()) %></td>
                                     <td>
-                                        <div class="buttons are-small">
-                                            <button class="button is-info">
-                                                <span class="icon is-small">
-                                                    <i class="fas fa-edit"></i>
-                                                </span>
-                                            </button>
-                                            <button class="button is-danger">
-                                                <span class="icon is-small">
-                                                    <i class="fas fa-trash-alt"></i>
-                                                </span>
-                                            </button>
-                                        </div>
+									    <input type="hidden" class="idpro" value="<%= c.getIdProducto() %>">
+									    <input 
+									        type="number" 
+									        class="input is-primary is-small text-center Cantidad" 
+									        value="<%= c.getCantidad() %>" 
+									        min="1"
+									        style="width: 80px; text-align: center;"
+									    >
+									</td>
+                                    <td>$<%= String.format("%.2f", c.getSubTotal()) %></td>
+                                    <td>                                                                                  
+                                       	<input type="hidden" class="idp" value="<%= c.getIdProducto() %>">
+										<button class="button is-danger btnDelete">
+										    <span class="icon is-small">
+										        <i class="fas fa-trash-alt"></i>
+										    </span>
+										</button>                                       
                                     </td>
                                 </tr>
                             <%
@@ -210,5 +215,30 @@
             }
         });
     </script>
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            // Get all "navbar-burger" elements
+            const navbarBurgers = Array.prototype.slice.call(document.querySelectorAll('.navbar-burger'), 0);
+
+            // Check if there are any navbar burgers
+            if (navbarBurgers.length > 0) {
+                // Add a click event on each of them
+                navbarBurgers.forEach(el => {
+                    el.addEventListener('click', () => {
+                        // Get the target from the "data-target" attribute
+                        const target = el.dataset.target;
+                        const $target = document.getElementById(target);
+
+                        // Toggle the "is-active" class on both the "navbar-burger" and the "navbar-menu"
+                        el.classList.toggle('is-active');
+                        $target.classList.toggle('is-active');
+                    });
+                });
+            }
+        });
+    </script>
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+	<script src="js/funciones.js"></script>
 </body>
 </html>
