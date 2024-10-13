@@ -11,7 +11,7 @@ public class Persona {
 	private String password;
 	private String tel;
 	private boolean habilitado;
-	private HashMap<Integer, Rol> roles;
+	public HashMap<Integer, Rol> roles;
 	
 	public int getId() {
 		return id;
@@ -83,6 +83,7 @@ public class Persona {
 		return "\nPersona [id=" + id + ", documento=" + documento + ", nombre=" + nombre + ", apellido=" + apellido
 				+ ", email=" + email + ", tel=" + tel + ", habilitado=" + habilitado + ", roles=" + roles + "]";
 	}
+
 	
 	
 

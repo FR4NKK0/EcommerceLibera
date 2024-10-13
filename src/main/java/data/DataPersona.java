@@ -138,6 +138,43 @@ public class DataPersona {
 		return p;
 	}
 	
+	public Persona getByEmail(Persona p) {
+	    PreparedStatement stmt = null;
+	    ResultSet rs = null;
+	    Persona persona = null;
+
+	    try {
+	        stmt = DbConnector.getInstancia().getConn().prepareStatement(
+	            "SELECT * FROM persona WHERE email = ?"
+	        );
+	        stmt.setString(1, p.getEmail());
+	        rs = stmt.executeQuery();
+
+	        if (rs != null && rs.next()) {
+	            persona = new Persona();
+	            persona.setId(rs.getInt("id"));
+	            persona.setNombre(rs.getString("nombre"));
+	            persona.setApellido(rs.getString("apellido"));
+	            persona.setEmail(rs.getString("email"));
+	            persona.setTel(rs.getString("tel"));
+	            persona.setHabilitado(rs.getBoolean("habilitado"));
+	            // Aquí puedes completar el mapeo de los demás atributos de Persona si es necesario
+	        }
+
+	    } catch (SQLException e) {
+	        e.printStackTrace();
+	    } finally {
+	        try {
+	            if (rs != null) rs.close();
+	            if (stmt != null) stmt.close();
+	            DbConnector.getInstancia().releaseConn();
+	        } catch (SQLException e) {
+	            e.printStackTrace();
+	        }
+	    }
+
+	    return persona;
+	}
 	
 	public LinkedList <Persona> getByApellido(String ape) {
 		DataRol dr=new DataRol();
@@ -184,43 +221,79 @@ public class DataPersona {
 	}
 	
 	public Persona add(Persona p) {
-		PreparedStatement stmt= null;
-		ResultSet keyResultSet=null;
-		try {
-			stmt=DbConnector.getInstancia().getConn().
-					prepareStatement(
-							"insert into persona(nombre, apellido, tipo_doc, nro_doc, email, password, tel, habilitado) values(?,?,?,?,?,?,?,?)",
-							PreparedStatement.RETURN_GENERATED_KEYS
-							);
-			stmt.setString(1, p.getNombre());
-			stmt.setString(2, p.getApellido());
-			stmt.setString(3, p.getDocumento().getTipo());
-			stmt.setString(4, p.getDocumento().getNro());
-			stmt.setString(5, p.getEmail());
-			stmt.setString(6, p.getPassword());
-			stmt.setString(7, p.getTel());
-			stmt.setBoolean(8, p.isHabilitado());
-			stmt.executeUpdate();
-			
-			keyResultSet=stmt.getGeneratedKeys();
-            if(keyResultSet!=null && keyResultSet.next()){
-                p.setId(keyResultSet.getInt(1));
-            }
+	    PreparedStatement stmt = null;
+	    ResultSet keyResultSet = null;
+	    int idPersona = -1;
 
-			
-		}  catch (SQLException e) {
-            e.printStackTrace();
-		} finally {
-            try {
-                if(keyResultSet!=null)keyResultSet.close();
-                if(stmt!=null)stmt.close();
-                DbConnector.getInstancia().releaseConn();
-            } catch (SQLException e) {
-            	e.printStackTrace();
-            }
-		}
-		return p;
-    }
+	    try {
+	        // Validar que no exista una persona con el mismo email
+	        if (getByEmail(p) != null) {
+	            throw new SQLException("Ya existe una persona con el email: " + p.getEmail());
+	        }
+
+	        // Validar que no exista una persona con el mismo número de documento
+	        if (getByDocumento(p) != null) {
+	            throw new SQLException("Ya existe una persona con el número de documento: " + p.getDocumento().getNro());
+	        }
+
+	        // Insertar la persona en la base de datos
+	        stmt = DbConnector.getInstancia().getConn().prepareStatement(
+	            "INSERT INTO persona(nombre, apellido, tipo_doc, nro_doc, email, password, tel, habilitado) VALUES (?, ?, ?, ?, ?, ?, ?, ?)",
+	            PreparedStatement.RETURN_GENERATED_KEYS
+	        );
+
+	        // Setear los valores en el statement
+	        stmt.setString(1, p.getNombre());
+	        stmt.setString(2, p.getApellido());
+	        stmt.setString(3, p.getDocumento().getTipo());
+	        stmt.setString(4, p.getDocumento().getNro());
+	        stmt.setString(5, p.getEmail());
+	        stmt.setString(6, p.getPassword());
+	        stmt.setString(7, p.getTel());
+	        stmt.setBoolean(8, p.isHabilitado());
+
+	        // Ejecutar la inserción
+	        stmt.executeUpdate();
+
+	        // Obtener el ID generado para la persona
+	        keyResultSet = stmt.getGeneratedKeys();
+	        if (keyResultSet != null && keyResultSet.next()) {
+	            idPersona = keyResultSet.getInt(1);
+	            p.setId(idPersona);
+	        }
+
+	        // Insertar los roles de la persona en la tabla rol_persona
+	        if (p.roles != null && !p.roles.isEmpty()) {
+	            stmt = DbConnector.getInstancia().getConn().prepareStatement(
+	                "INSERT INTO rol_persona(id_persona, id_rol) VALUES (?, ?)"
+	            );
+	            for (Integer idRol : p.roles.keySet()) {
+	                stmt.setInt(1, idPersona); // ID de la persona recién generada
+	                stmt.setInt(2, idRol); // ID del rol
+	                stmt.executeUpdate();
+	            }
+	        }
+
+	    } catch (SQLException e) {
+	        e.printStackTrace();
+	        // Aquí se podría manejar el error de una forma más específica, como lanzarlo a capas superiores para informar al usuario
+	    } finally {
+	        // Cerrar los recursos
+	        try {
+	            if (keyResultSet != null) keyResultSet.close();
+	            if (stmt != null) stmt.close();
+	            DbConnector.getInstancia().releaseConn();
+	        } catch (SQLException e) {
+	            e.printStackTrace();
+	        }
+	    }
+
+	    return p;
+	}
+
+
+	 
+
 	
 	public Persona put(Persona p) {
 		PreparedStatement stmt= null;
