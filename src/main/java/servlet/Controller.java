@@ -6,8 +6,10 @@ import jakarta.servlet.annotation.WebServlet;
 import jakarta.servlet.http.HttpServlet;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
+import jakarta.servlet.http.HttpSession;
 import jakarta.servlet.http.Part;
 import logic.FechaHoy;
+import logic.Login;
 
 import java.io.IOException;
 import java.io.InputStream;
@@ -25,6 +27,7 @@ public class Controller extends HttpServlet {
     private DataProducto dp = new DataProducto();
     private DataCategoria dc = new DataCategoria();
     private List<Carrito> listaCarrito = new ArrayList<>();
+    private Login ctrl= new Login();
     int item;
     double totalPagar=0.0;
     int cantidad = 1;
@@ -75,6 +78,12 @@ public class Controller extends HttpServlet {
             case "ActualizarCantidad":
             	actualizarCantidad(request,response);
             	break;
+            case "SignIn":
+            	signIn(request, response);
+            	break;
+            case "SignOut":
+            	signOut(request, response);
+            break;
             case "Registrar":
             	registerForm(request, response);
                 break;
@@ -95,7 +104,73 @@ public class Controller extends HttpServlet {
         }
     }
 
-    private void generarCompra(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException{
+    private void signOut(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
+        HttpSession session = request.getSession(false); 
+        if (session != null) {
+            session.invalidate(); 
+        }
+
+        if (request.getCookies() != null) {
+            for (var cookie : request.getCookies()) {
+                if (cookie.getName().equals("user")) {
+                    cookie.setMaxAge(0); 
+                    cookie.setPath("/");
+                    response.addCookie(cookie); 
+                }
+            }
+        }
+
+        response.sendRedirect("Controller?accion=ListarCatalogo");
+    }
+	
+
+	private void signIn(HttpServletRequest request, HttpServletResponse response)throws ServletException, IOException {
+    	 try {
+    	        // Obtener los datos del formulario
+    	        String email = request.getParameter("email");
+    	        String password = request.getParameter("password");
+
+    	        // Validar que los campos no estén vacíos
+    	        if (email == null || email.isEmpty() || password == null || password.isEmpty()) {
+    	            request.setAttribute("mensajeError", "Email y contraseña son obligatorios.");
+    	            request.getRequestDispatcher("index.jsp").forward(request, response);
+    	            return;
+    	        }
+
+    	        // Configurar la persona con los datos ingresados
+    	        persona.setEmail(email);
+    	        persona.setPassword(password);
+
+    	        // Validar las credenciales
+    	        persona = ctrl.validate(persona);
+
+    	        if (persona != null /*&& persona.isHabilitado()*/) {
+    	            // Iniciar la sesión y redirigir al catálogo
+    	            request.getSession().setAttribute("user", persona);
+    	            response.sendRedirect("Controller?accion=ListarCatalogo");
+    	            System.out.println("Persona logueada");
+    	            System.out.println(persona.getApellido());
+    	        } else {
+    	            // Si no se encuentra la persona o no está habilitada, redirigir con mensaje de error
+    	            request.setAttribute("mensajeError", "Email o contraseña incorrectos, o usuario no habilitado.");
+    	            request.getRequestDispatcher("index.jsp").forward(request, response);
+    	        }
+    	    } catch (Exception e) {
+    	        e.printStackTrace();
+    	        request.setAttribute("mensajeError", "Ocurrió un error durante el inicio de sesión.");
+    	        try {
+					request.getRequestDispatcher("index.jsp").forward(request, response);
+				} catch (ServletException e1) {
+					// TODO Auto-generated catch block
+					e1.printStackTrace();
+				} catch (IOException e1) {
+					// TODO Auto-generated catch block
+					e1.printStackTrace();
+				}
+    	    }
+	}
+
+	private void generarCompra(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException{
     	Persona persona=new Persona();
     	Pago pago=new Pago();
     	DataCompra dc = new DataCompra();
@@ -131,7 +206,7 @@ public class Controller extends HttpServlet {
             persona.setEmail(email);
             persona.setTel(telefono);
             persona.setPassword(password);
-            persona.setHabilitado(false);
+            persona.setHabilitado(true);
             persona.addRol(rol);
             personaDAO.add(persona);
             request.setAttribute("mensaje", "Registro exitoso");

@@ -24,12 +24,10 @@
 <body>
     <nav class="navbar has-shadow is-spaced is-warning" role="navigation" aria-label="main navigation">
         <div class="navbar-brand">
-            <a class="navbar-item" href="Controller?accion=ListarCatalogo" >
+            <a class="navbar-item" href="Controller?accion=ListarCatalogo">
                 <img src="style/iconcarrito.png" alt="Home" class="logo-image">
             </a>
-
             <a role="button" class="navbar-burger" aria-label="menu" aria-expanded="false" data-target="navbarBasicExample">
-                <span aria-hidden="true"></span>
                 <span aria-hidden="true"></span>
                 <span aria-hidden="true"></span>
                 <span aria-hidden="true"></span>
@@ -41,7 +39,6 @@
                 <a class="navbar-item">
                     Ofertas del Día
                 </a>
-             
                 <div class="navbar-item">
                     <form>
                         <div class="control has-icons-left">
@@ -52,46 +49,57 @@
                         </div>
                     </form>
                 </div>
-                <div class="navbar-item has-dropdown is-hoverable">
-                    <a class="navbar-link">
-                        More
-                    </a>
-
-                    <div class="navbar-dropdown">
-                        <a class="navbar-item">
-                            About
-                        </a>
-                        <a class="navbar-item is-selected">
-                            Jobs
-                        </a>
-                        <a class="navbar-item">
-                            Contact
-                        </a>
-                        <hr class="navbar-divider">
-                        <a class="navbar-item">
-                            Report an issue
-                        </a>
-                    </div>
-                </div>
             </div>
 
             <div class="navbar-end">
                 <div class="navbar-item">
                     <div class="buttons">
-                        <a class="button is-primary">
-                            <strong>Sign up</strong>
-                        </a>
-                        <a class="button is-light">
-                            Log in
-                        </a>
-                        <a class="nav-link button is-light" href="Controller?accion=ListarCatalogo">
-                            Seguir Comprando                          
-                        </a>
-                        <form action="Controller" method="post">
-                            <div class="control">
-                                <button type="submit" name="accion" value="Listar" class="button is-danger">Management</button>
+                        <% 
+                            Persona user = (Persona) session.getAttribute("user");
+                            if (user == null) { 
+                        %>
+                            <a class="button is-primary" id="btn-signup">
+                                <strong>Sign up</strong>
+                            </a>
+                            <a class="button is-light" id="signInButton">
+                                Sign in
+                            </a>
+                        <% 
+                            } else { 
+                        %>
+                            <a class="nav-link button is-light" href="Controller?accion=Carrito">
+                                <i class="fas fa-cart-plus">
+                                (<label style="color: orange"> ${contador} </label>)</i>Carrito                          
+                            </a>
+                            
+                            <% if (user.isHabilitado()) { %>
+                                <!-- Mostrar Management si el usuario está habilitado -->
+                                <form action="Controller" method="post">
+                                    <div class="control">
+                                        <button type="submit" name="accion" value="Listar" class="button is-danger">Management</button>
+                                    </div>
+                                </form>
+                            <% } %>
+                            
+                            <!-- Dropdown para el usuario logueado -->
+                            <div class="navbar-item has-dropdown is-hoverable">
+                                <a class="navbar-link">
+                                    <i class="fas fa-user"></i> <%= user.getNombre() %>
+                                </a>
+                                <div class="navbar-dropdown">
+                                    <a class="navbar-item" href="Controller?accion=Perfil">
+                                        Mi perfil
+                                    </a>
+                                    <a class="navbar-item" href="Controller?accion=MisCompras">
+                                        Mis compras
+                                    </a>
+                                    <hr class="navbar-divider">
+                                    <a class="navbar-item" href="Controller?accion=SignOut">
+                                        Sign out
+                                    </a>
+                                </div>
                             </div>
-                        </form>
+                        <% } %>
                     </div>
                 </div>
             </div>

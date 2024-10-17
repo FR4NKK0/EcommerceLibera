@@ -54,75 +54,114 @@
             <div class="navbar-end">
                 <div class="navbar-item">
                     <div class="buttons">
-                        <a class="button is-primary" id="btn-signup">
-                            <strong>Sign up</strong>
-                        </a>
-                        <a class="button is-light">
-                            Log in
-                        </a>
-                        <a class="nav-link button is-light" href="Controller?accion=Carrito">
-                            <i class="fas fa-cart-plus">
-                            (<label style="color: orange"> ${contador} </label>)</i>Carrito                          
-                        </a>
-                        <form action="Controller" method="post">
-                            <div class="control">
-                                <button type="submit" name="accion" value="Listar" class="button is-danger">Management</button>
+                        <% 
+                            Persona user = (Persona) session.getAttribute("user");
+                            if (user == null) { 
+                        %>
+                            <!-- Mostrar Sign up y Sign in solo si no hay usuario logueado -->
+                            <a class="button is-primary" id="btn-signup">
+                                <strong>Sign up</strong>
+                            </a>
+                            <a class="button is-light" id="signInButton">
+                                Sign in
+                            </a>
+                        <% 
+                            } else { 
+                        %>
+                            <!-- Mostrar opciones si el usuario está logueado -->
+                            <a class="nav-link button is-light" href="Controller?accion=Carrito">
+                                <i class="fas fa-cart-plus">
+                                (<label style="color: orange"> ${contador} </label>)</i>Carrito                          
+                            </a>
+                            
+                            <% if (user.isHabilitado()) { %>
+                                <!-- Mostrar Management si el usuario está habilitado -->
+                                <form action="Controller" method="post">
+                                    <div class="control">
+                                        <button type="submit" name="accion" value="Listar" class="button is-danger">Management</button>
+                                    </div>
+                                </form>
+                            <% } %>
+                            
+                            <!-- Dropdown para el usuario logueado -->
+                            <div class="navbar-item has-dropdown is-hoverable">
+                                <a class="navbar-link">
+                                    <i class="fas fa-user"></i> <%= user.getNombre() %>
+                                </a>
+                                <div class="navbar-dropdown">
+                                    <a class="navbar-item" href="Controller?accion=Perfil">
+                                        Mi perfil
+                                    </a>
+                                    <a class="navbar-item" href="Controller?accion=MisCompras">
+                                        Mis compras
+                                    </a>
+                                    <hr class="navbar-divider">
+                                    <a class="navbar-item" href="Controller?accion=SignOut">
+                                        Sign out
+                                    </a>
+                                </div>
                             </div>
-                        </form>
+                        <% } %>
                     </div>
                 </div>
             </div>
         </div>
     </nav>
    <section class="section">
-	  <div class="container">
-	    <h1 class="title">Catálogo de Productos</h1>
-	    <div class="container mt-4">
-	      <div class="columns is-multiline">
-	        <% 
-	        List<Producto> catalogo = (List<Producto>) request.getAttribute("productos");
-	        if (catalogo != null && !catalogo.isEmpty()) {
-	          for (Producto p : catalogo) {
-	        %>
-	        <div class="column is-one-third">
-	          <div class="card">
-	            <header class="card-header">
-	              <p class="card-header-title">
-	                <%= p.getNombre() %>
-	              </p>
-	            </header>
-	            <div class="card-content">
-	              <div class="content">
-	                <p class="is-italic has-text-weight-bold is-size-4 mb-2">$<%= String.format("%.2f", p.getPrecio()) %></p>
-	                <figure class="image is-4by3">
-	                  <img src="ControllerImg?id=<%= p.getId() %>" alt="<%= p.getNombre() %>">
-	                </figure>
-	              </div>
-	            </div>
-	            <footer class="card-footer">
-	              <div class="card-footer-item is-flex is-flex-direction-column is-align-items-flex-start">
-	                <p class="mb-2"><%= p.getDescripcion() %></p>
-	                <div class="buttons">
-	                  <a href="Controller?accion=AgregarCarrito&id=<%= p.getId() %>" class="button is-info is-outlined">Agregar al carrito</a>
-	                  <a href="Controller?accion=ComprarAhora&id=<%= p.getId() %>" class="button is-danger">Comprar</a>
+	    <div class="container">
+	        <h1 class="title">Catálogo de Productos</h1>
+	        <div class="container mt-4">
+	            <div class="columns is-multiline">
+	                <% 
+	                List<Producto> catalogo = (List<Producto>) request.getAttribute("productos");
+	                boolean userLoggedIn = request.getSession().getAttribute("user") != null;
+	
+	                if (catalogo != null && !catalogo.isEmpty()) {
+	                    for (Producto p : catalogo) {
+	                %>
+	                <div class="column is-one-third">
+	                    <div class="card">
+	                        <header class="card-header">
+	                            <p class="card-header-title">
+	                                <%= p.getNombre() %>
+	                            </p>
+	                        </header>
+	                        <div class="card-content">
+	                            <div class="content">
+	                                <p class="is-italic has-text-weight-bold is-size-4 mb-2">$<%= String.format("%.2f", p.getPrecio()) %></p>
+	                                <figure class="image is-4by3">
+	                                    <img src="ControllerImg?id=<%= p.getId() %>" alt="<%= p.getNombre() %>">
+	                                </figure>
+	                            </div>
+	                        </div>
+	                        <footer class="card-footer">
+	                            <div class="card-footer-item is-flex is-flex-direction-column is-align-items-flex-start">
+	                                <p class="mb-2"><%= p.getDescripcion() %></p>
+	                                <div class="buttons">
+	                                    <% if (userLoggedIn) { %>
+	                                        <a href="Controller?accion=AgregarCarrito&id=<%= p.getId() %>" class="button is-info is-outlined">Agregar al carrito</a>
+	                                    <% } else { %>
+	                                        <a class="button is-info is-outlined is-disabled"  title="Inicie sesión para agregar al carrito" style="pointer-events: none;">Agregar al carrito</a>
+	                                    <% } %>
+	                                    <a href="Controller?accion=ComprarAhora&id=<%= p.getId() %>" class="button is-danger">Comprar</a>
+	                                </div>
+	                            </div>
+	                        </footer>
+	                    </div>
 	                </div>
-	              </div>
-	            </footer>
-	          </div>
+	                <% 
+	                    }
+	                } else {
+	                %>
+	                <div class="column">
+	                    <p class="has-text-centered">No hay productos disponibles en este momento.</p>
+	                </div>
+	                <%
+	                }
+	                %>
+	            </div>
 	        </div>
-	        <% 
-	          }
-	        } else {
-	        %>
-	        <div class="column">
-	          <p class="has-text-centered">No hay productos disponibles en este momento.</p>
-	        </div>
-	        <%
-	        }
-	        %>
-	      </div>
 	    </div>
-	  </div>
 	</section>
 	
 	
@@ -208,7 +247,61 @@
             </section>
         </div>
     </div>
-
+    
+	<div class="modal" id="signInModal">
+	    <div class="modal-background"></div>
+	    <div class="modal-card">
+	        <header class="modal-card-head">
+	            <p class="modal-card-title">Sign in</p>
+	            <button class="delete" aria-label="close" id="closeSignInModal"></button>
+	        </header>
+	        <section class="modal-card-body">
+	            <form id="signInForm" method="post" action="Controller">
+	                <div class="field">
+	                    <label class="label">Email</label>
+	                    <div class="control">
+	                        <input class="input" type="email" name="email" placeholder="e.g. john@example.com" required>
+	                    </div>
+	                </div>
+	                <div class="field">
+	                    <label class="label">Password</label>
+	                    <div class="control">
+	                        <input class="input" type="password" name="password" placeholder="********" required>
+	                    </div>
+	                </div>
+	                <input type="hidden" name="accion" value="SignIn">
+	                <footer class="modal-card-foot">
+	                    <button type="submit" class="button is-primary">Sign in</button>
+	                    <button type="button" class="button" id="cancelSignIn">Cancel</button>
+	                </footer>
+	            </form>
+	        </section>
+	    </div>
+	</div>
+	
+	<script>
+	    document.addEventListener('DOMContentLoaded', () => {
+	        // Referencias a elementos
+	        const signInButton = document.getElementById('signInButton');
+	        const signInModal = document.getElementById('signInModal');
+	        const closeSignInModal = document.getElementById('closeSignInModal');
+	        const cancelSignIn = document.getElementById('cancelSignIn');
+	
+	        // Mostrar modal de Sign in
+	        signInButton.addEventListener('click', () => {
+	            signInModal.classList.add('is-active');
+	        });
+	
+	        // Cerrar modal de Sign in
+	        closeSignInModal.addEventListener('click', () => {
+	            signInModal.classList.remove('is-active');
+	        });
+	        cancelSignIn.addEventListener('click', () => {
+	            signInModal.classList.remove('is-active');
+	        });
+	    });
+	</script>
+	
     <script>
         document.addEventListener('DOMContentLoaded', () => {
             const modal = document.getElementById('modal-register');
