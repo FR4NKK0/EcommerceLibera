@@ -26,6 +26,7 @@ public class Controller extends HttpServlet {
     private DataPersona personaDAO=new DataPersona();
     private DataProducto dp = new DataProducto();
     private DataCategoria dc = new DataCategoria();
+    private DataCompra dcompra = new DataCompra();
     private List<Carrito> listaCarrito = new ArrayList<>();
     private Login ctrl= new Login();
     int item;
@@ -33,7 +34,11 @@ public class Controller extends HttpServlet {
     int cantidad = 1;
     int idp;
     Carrito car;
-    
+    Pago pago = new Pago();
+    int idcompra;
+    int idPago;
+    int rpago=0;
+     FechaHoy fechaSistema= new FechaHoy();
 
     public Controller() {
         super();
@@ -93,17 +98,52 @@ public class Controller extends HttpServlet {
             case "Carrito":
             	carritoDeCompras(request, response);
             	break;
-            case "GenerarCompra":
+            case "Comprar":
             	generarCompra(request,response);
             	break;
             case "ComprarAhora":
             	comprarAhora(request, response);
+            	break;
+            case "RealizarPago":
+            	realizarPago(request, response);
+            	break;
             default:
                 listarCatalogo(request, response);
                 break;
         }
     }
 
+    private void realizarPago(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
+        String nombre = request.getParameter("nombre");
+        String numeroT = request.getParameter("numero");
+        String fechaE = request.getParameter("fecha");
+        String codS = request.getParameter("cvv");
+        Tarjeta t = dcompra.GetTarjeta(numeroT);
+        System.out.println(t.getNumero());
+
+        if (t.getNumero() != null) {
+            if (nombre.equals(t.getNombre()) && codS.equals(t.getCodigo())) {
+                if (t.getSaldo() >= totalPagar) {
+                    if (persona.getId() != 0 && totalPagar > 0) {
+                        rpago = dcompra.Pagar(totalPagar, t.getId());
+                        System.out.println(t.getNombre());
+                        request.getRequestDispatcher("Controller?accion=Comprar").forward(request, response);
+                    }
+                } else {
+                    request.setAttribute("error", "Saldo insuficiente.");
+                    request.getRequestDispatcher("carrito.jsp").forward(request, response);
+                }
+            } else {
+                request.setAttribute("error", "Datos de la tarjeta incorrectos.");
+                request.getRequestDispatcher("carrito.jsp").forward(request, response);
+            }
+        } else {
+            request.setAttribute("error", "Tarjeta no encontrada.");
+            request.getRequestDispatcher("carrito.jsp").forward(request, response);
+        }
+    }
+
+    
     private void signOut(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
         HttpSession session = request.getSession(false); 
         if (session != null) {
@@ -171,17 +211,43 @@ public class Controller extends HttpServlet {
 	}
 
 	private void generarCompra(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException{
-    	Persona persona=new Persona();
-    	Pago pago=new Pago();
-    	DataCompra dc = new DataCompra();
-    	Compra compra = new Compra(persona, pago.getId(), FechaHoy.FechaBD(),pago.getMonto(),"Cancelado", listaCarrito);
-		int res=dc.GenerarCompra(compra);
-		if(res!=0&&totalPagar>0) {
-			request.getRequestDispatcher("mensaje.jsp").forward(request, response);
-			
-		}else {
-			request.getRequestDispatcher("error.jsp").forward(request, response);
-		}
+    	idPago= dcompra.GetIdDelUltimoPago();
+    	if(persona.getId()!=0 && listaCarrito.size()!=0 && rpago==1) {
+    		if (totalPagar>0.0) {
+    			Compra co = new Compra();
+    			co.setPersona(persona);
+    			co.setFecha(fechaSistema.FechaBD());
+    			co.setMonto(totalPagar);
+    			co.setIdpago(idPago);
+    			co.setEstado("En espera");
+    			dcompra.GenerarCompra(co);
+    			
+    			idcompra = dcompra.getIdDeUltimaCompra();
+    			for (int i=0;i<listaCarrito.size();i++) {
+    				DetalleCompra detalle = new DetalleCompra();
+    				detalle.setIdcompra(idcompra);
+    				detalle.setIdproducto(listaCarrito.get(i).getIdProducto());
+    				detalle.setCantidad(listaCarrito.get(i).getCantidad());
+    				detalle.setPrecioCompra(listaCarrito.get(i).getPrecioCompra());
+    				dcompra.guardarDetalle_compra(detalle);
+    			}
+    			
+    			for (Carrito p :listaCarrito ) {
+    				Producto pro = new Producto();
+    				pro.setId(p.getIdProducto());
+    				pro.setStock(p.getCantidad());
+    				dp.ActualizarStock(pro);
+    			}
+    			/*listaCarrito= new ArrayList<>();
+    			List compras = dcompra.misCompras(persona.getId());
+    			request.getRequestDispatcher("Controller?=accion=Imprimir").forward(request, response);*/
+    			request.getRequestDispatcher("Controller?accion=ListarCatalogo").forward(request, response);
+    		} else {
+    			request.getRequestDispatcher("Controller?accion=ListarCatalogo").forward(request, response);
+    		}
+    	} else {
+    		request.getRequestDispatcher("Controlador?accion=Carrito").forward(request, response);
+    	}
     }
     
 	private void registerForm(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException{

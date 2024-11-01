@@ -11,6 +11,9 @@ import java.util.*;
 
 public class DataProducto {
 	
+	
+	int r=0;
+	
 	public List<Producto> getAll() {
 	    List<Producto> productos = new ArrayList<>();
 	    PreparedStatement stmt = null;
@@ -366,6 +369,19 @@ public class DataProducto {
 	            e.printStackTrace();
 	        }
 	    }
+	}
+	
+	public int ActualizarStock(Producto p) {
+		PreparedStatement stmt = null;
+		try {
+			stmt=DbConnector.getInstancia().getConn().prepareStatement("UPDATE producto set stock=stock-? WHERE id=?");
+			stmt.setInt(1, p.getStock());
+			stmt.setInt(2, p.getId());
+			r=stmt.executeUpdate();
+		}catch(SQLException e) {
+			System.err.println("Error al actualizar Stock" + e);
+		}
+		return r;
 	}
 
 	

@@ -199,15 +199,68 @@
                             </div>
                         </div>
                         <footer class="card-footer">
-                            <a href="#" class="card-footer-item button is-info is-fullwidth">Realizar Pago</a>
-                            <a href="#" class="card-footer-item button is-danger is-fullwidth">Generar Compra</a>
+                           <button id="openPaymentModal" class="card-footer-item button is-info is-fullwidth">Comprar</button>
                         </footer>
                     </div>
                 </div>
             </div>
         </div>
     </section>
+    
+	<div class="modal" id="paymentModal">
+        <div class="modal-background"></div>
+        <div class="modal-card">
+            <header class="modal-card-head">
+                <p class="modal-card-title">Confirmación de Pago</p>
+                <button class="delete" aria-label="close" id="closeModal"></button>
+            </header>
+            <section class="modal-card-body">
+                <form id="paymentForm" action="Controller?accion=RealizarPago" method="post" enctype="form-data">
+                    <div class="field">
+                        <label class="label">Nombre en la tarjeta</label>
+                        <div class="control">
+                            <input class="input" type="text" name="nombre" placeholder="Nombre completo" required>
+                        </div>
+                    </div>
+                    <div class="field">
+                        <label class="label">Número de la tarjeta</label>
+                        <div class="control">
+                            <input class="input" type="text" name="numero" placeholder="1234 5678 9101 1121" maxlength="19" required>
+                        </div>
+                    </div>
+                    <div class="field is-flex">
+                        <div class="control mr-2">
+                            <label class="label">Fecha de expiración</label>
+                            <input class="input" type="text" placeholder="MM/AA" name="fecha" maxlength="5" required>
+                        </div>
+                        <div class="control">
+                            <label class="label">CVV</label>
+                            <input class="input" type="text" name="cvv" placeholder="123" maxlength="3" required>
+                        </div>
+                    </div>
+                </form>
+            </section>
+            <footer class="modal-card-foot">
+                <button type="submit" form="paymentForm" class="button is-success" name="accion" value="RealizarPago">Pagar ahora</button>
+                <button class="button" id="cancelPayment">Cancelar</button>
+            </footer>
+        </div>
+    </div>
 
+    <script>
+        // Abrir el modal de pago
+        document.getElementById('openPaymentModal').addEventListener('click', () => {
+            document.getElementById('paymentModal').classList.add('is-active');
+        });
+
+        // Cerrar el modal
+        document.getElementById('closeModal').addEventListener('click', () => {
+            document.getElementById('paymentModal').classList.remove('is-active');
+        });
+        document.getElementById('cancelPayment').addEventListener('click', () => {
+            document.getElementById('paymentModal').classList.remove('is-active');
+        });
+    </script>
     <script>
         document.addEventListener('DOMContentLoaded', () => {
             const $navbarBurgers = Array.prototype.slice.call(document.querySelectorAll('.navbar-burger'), 0);
