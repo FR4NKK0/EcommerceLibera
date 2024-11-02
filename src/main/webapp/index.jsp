@@ -76,11 +76,19 @@
                             
                             <% if (user.isHabilitado()) { %>
                                 <!-- Mostrar Management si el usuario está habilitado -->
-                                <form action="Controller" method="post">
-                                    <div class="control">
-                                        <button type="submit" name="accion" value="Listar" class="button is-danger">Management</button>
-                                    </div>
-                                </form>
+                                <div class="navbar-item has-dropdown is-hoverable">
+                                <a class="navbar-link">
+                                    <i ></i> Management
+                                </a>
+                                <div class="navbar-dropdown">                               
+                                	<a class="navbar-item" href="Controller?accion=Listar">
+                                        Productos
+                                    </a>
+                                    <a class="navbar-item" href="Controller?accion=ListarCategorias">
+                                        Categorias
+                                    </a>
+                                	</div>
+                                </div>
                             <% } %>
                             
                             <!-- Dropdown para el usuario logueado -->

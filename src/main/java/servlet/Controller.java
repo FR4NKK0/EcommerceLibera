@@ -107,12 +107,100 @@ public class Controller extends HttpServlet {
             case "RealizarPago":
             	realizarPago(request, response);
             	break;
+            case "CrearCategoria":
+            	addCategoria(request, response);
+            	break;
+            case "ListarCategorias":
+            	listarCategorias(request, response);
+            	break;
+            case "EditCategoria":
+            	editarCategoria(request, response);
+            	break;
+            case "DeleteCategoria":
+            	deleteCategoria(request, response);
+            break;
             default:
                 listarCatalogo(request, response);
                 break;
         }
     }
+    
+    
+    private void deleteCategoria(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
+    	try {
+    		int idCategoria = Integer.parseInt(request.getParameter("id"));
+    		dc.delete(idCategoria);
+    		request.getRequestDispatcher("Controller?accion=ListarCategorias").forward(request, response);
+    	}catch(Exception e) {
+    		e.printStackTrace();
+    	}
+    }
 
+    private void editarCategoria(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
+    	try {
+    		int idCategoria = Integer.parseInt(request.getParameter("id"));
+    		String nombCatEdit = request.getParameter("nombre");
+    		Categoria catEdit = new Categoria();
+    		catEdit.setId(idCategoria);
+    		catEdit.setNombre(nombCatEdit);
+    		dc.update(catEdit);
+    		request.getRequestDispatcher("Controller?accion=ListarCategorias").forward(request, response);
+    	}catch(Exception e) {
+    	e.printStackTrace();
+    	}
+    }
+    
+    private void addCategoria(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
+        
+        try {
+            String nombreCat = request.getParameter("txtNom");
+            System.out.print(nombreCat);
+            if (nombreCat == null || nombreCat.trim().isEmpty()) {
+                throw new IllegalArgumentException("El nombre de la categoría no puede estar vacío");
+            }
+            
+            Categoria cat = new Categoria();
+            Categoria getOne = new Categoria();
+            getOne=dc.getByName(nombreCat);
+            if (getOne == null) {
+            cat.setNombre(nombreCat);
+            System.out.print(cat.getNombre());
+            dc.add(cat);
+            } else {
+            	throw new IllegalArgumentException("Ya existe una categoria con este nombre");
+            }
+            
+            
+
+            request.getRequestDispatcher("Controller?accion=ListarCategorias").forward(request, response);
+        } catch (IllegalArgumentException e) {
+            response.setStatus(HttpServletResponse.SC_BAD_REQUEST);
+            response.getWriter().write("ERROR: " + e.getMessage());
+            System.out.print("error");
+        } catch (Exception e) {
+            response.setStatus(HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
+            response.getWriter().write("ERROR: " + e.getMessage());
+            e.printStackTrace(); 
+            System.out.print( e);
+        	}
+        }
+    
+    private void listarCategorias(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
+        response.setContentType("text/plain");
+        
+        try {
+            List<Categoria> categorias = dc.getAll(); 
+            request.setAttribute("categorias", categorias);
+            request.getRequestDispatcher("categoriasCRUD.jsp").forward(request, response);
+            
+        } catch (Exception e) {
+            response.setStatus(HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
+            response.getWriter().write("ERROR: " + e.getMessage());
+            System.out.print( e);
+            e.printStackTrace();
+        }
+    }
+    
     private void realizarPago(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
         String nombre = request.getParameter("nombre");
         String numeroT = request.getParameter("numero");
