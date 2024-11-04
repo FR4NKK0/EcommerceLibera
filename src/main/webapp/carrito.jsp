@@ -22,7 +22,7 @@
     </style>
 </head>
 <body>
-    <nav class="navbar has-shadow is-spaced is-warning" role="navigation" aria-label="main navigation">
+   <nav class="navbar has-shadow is-spaced is-warning" role="navigation" aria-label="main navigation">
         <div class="navbar-brand">
             <a class="navbar-item" href="Controller?accion=ListarCatalogo">
                 <img src="style/iconcarrito.png" alt="Home" class="logo-image">
@@ -58,6 +58,7 @@
                             Persona user = (Persona) session.getAttribute("user");
                             if (user == null) { 
                         %>
+                            <!-- Mostrar Sign up y Sign in solo si no hay usuario logueado -->
                             <a class="button is-primary" id="btn-signup">
                                 <strong>Sign up</strong>
                             </a>
@@ -66,19 +67,33 @@
                             </a>
                         <% 
                             } else { 
+                            	Rol rol= new Rol();
+                            	rol.setDescripcion("admin");
+                            	DataRol dataRol= new DataRol();
+                            	rol=dataRol.getByDesc(rol);
                         %>
                             <a class="nav-link button is-light" href="Controller?accion=Carrito">
                                 <i class="fas fa-cart-plus">
                                 (<label style="color: orange"> ${contador} </label>)</i>Carrito                          
                             </a>
                             
-                            <% if (user.isHabilitado()) { %>
-                                <!-- Mostrar Management si el usuario está habilitado -->
-                                <form action="Controller" method="post">
-                                    <div class="control">
-                                        <button type="submit" name="accion" value="Listar" class="button is-danger">Management</button>
-                                    </div>
-                                </form>
+                            <% if (user.hasRol(rol)) { %>
+                                <div class="navbar-item has-dropdown is-hoverable">
+                                <a class="navbar-link">
+                                    <i ></i> Management
+                                </a>
+                                <div class="navbar-dropdown">                               
+                                	<a class="navbar-item" href="Controller?accion=Listar">
+                                        Productos
+                                    </a>
+                                    <a class="navbar-item" href="Controller?accion=ListarCategorias">
+                                        Categorias
+                                    </a>
+                                    <a class="navbar-item" href="Controller?accion=ListarPersonas">
+                                        Usuarios
+                                    </a>
+                                	</div>
+                                </div>
                             <% } %>
                             
                             <!-- Dropdown para el usuario logueado -->

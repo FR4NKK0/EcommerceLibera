@@ -2,6 +2,7 @@
     pageEncoding="ISO-8859-1"%>
 <%@ page import="entities.*" %>
 <%@ page import="java.util.*" %>
+<%@ page import="data.*" %>
 <!DOCTYPE html>
 <html>
 <head>
@@ -50,7 +51,7 @@
     </style>
 </head>
 <body>
-    <nav class="navbar has-shadow is-spaced is-warning" role="navigation" aria-label="main navigation">
+   <nav class="navbar has-shadow is-spaced is-warning" role="navigation" aria-label="main navigation">
         <div class="navbar-brand">
             <a class="navbar-item" href="Controller?accion=ListarCatalogo">
                 <img src="style/iconcarrito.png" alt="Home" class="logo-image">
@@ -94,16 +95,20 @@
                                 Sign in
                             </a>
                         <% 
-                            } else { 
+                            } else {
+                            	boolean isAdmin = false;
+                            	Rol rol= new Rol();
+                            	rol.setDescripcion("admin");
+                            	DataRol dataRol= new DataRol();
+                            	rol=dataRol.getByDesc(rol);
+                            	isAdmin = user.hasRol(rol);
                         %>
-                            <!-- Mostrar opciones si el usuario está logueado -->
                             <a class="nav-link button is-light" href="Controller?accion=Carrito">
                                 <i class="fas fa-cart-plus">
                                 (<label style="color: orange"> ${contador} </label>)</i>Carrito                          
                             </a>
                             
-                            <% if (user.isHabilitado()) { %>
-                                <!-- Mostrar Management si el usuario está habilitado -->
+                            <% if (isAdmin) { %>
                                 <div class="navbar-item has-dropdown is-hoverable">
                                 <a class="navbar-link">
                                     <i ></i> Management
@@ -114,6 +119,9 @@
                                     </a>
                                     <a class="navbar-item" href="Controller?accion=ListarCategorias">
                                         Categorias
+                                    </a>
+                                    <a class="navbar-item" href="Controller?accion=ListarPersonas">
+                                        Usuarios
                                     </a>
                                 	</div>
                                 </div>
@@ -143,7 +151,19 @@
             </div>
         </div>
     </nav>
+    
+<%
+        boolean isAdmin = false;
+        if (user != null) {
+            Rol rol = new Rol();
+            rol.setDescripcion("admin");
+            DataRol dataRol = new DataRol();
+            rol = dataRol.getByDesc(rol);
+            isAdmin = user.hasRol(rol);
+        }
 
+        if (isAdmin) {
+    %>
     <div class="container">
     <div class="form-section">
         
@@ -199,7 +219,7 @@
 			                            <button class="button is-link" type="submit" name="accion" value="Edit">Edit</button>
 			                        </div>
 			                        <div class="control">
-			                            <button class="button is-light" type="submit" name="accion" value="Delete">Delete</button>
+			                            <button class="button is-light" type="button" onclick="abrirModalConfirmacion('<%= p.getId() %>')">Delete</button>
 			                        </div>
 			                    </div>
 			                </form>
@@ -214,6 +234,27 @@
         </div>
     </div>
 </div>
+
+<div id="modalConfirmacion" class="modal">
+    <div class="modal-background"></div>
+    <div class="modal-card">
+        <header class="modal-card-head">
+            <p class="modal-card-title">Confirmar Eliminación</p>
+            <button class="delete" aria-label="close" onclick="cerrarModalConfirmacion()"></button>
+        </header>
+        <section class="modal-card-body">
+            <p>¿Estás seguro de que deseas eliminar este producto? Esta acción no se puede deshacer.</p>
+        </section>
+        <footer class="modal-card-foot">
+            <!-- Formulario de eliminación -->
+            <form id="formDeleteProducto" action="Controller" method="post">
+                <input type="hidden" name="id" id="deleteProductoId">
+                <button class="button is-danger" type="submit" name="accion" value="DeleteProducto">Eliminar</button>
+                <button class="button" type="button" onclick="cerrarModalConfirmacion()">Cancelar</button>
+            </form>
+        </footer>
+    </div>
+</div>   
     
     
 <div class="modal" id="addProductModal">
@@ -285,6 +326,174 @@
         <button class="modal-close is-large" aria-label="close" onclick="closeModal()"></button>
     </div>
 
+<div class="modal" id="modal-register">
+        <div class="modal-background"></div>
+        <div class="modal-card">
+            <header class="modal-card-head">
+                <p class="modal-card-title">Registrar Persona</p>
+                <button class="delete" aria-label="close" id="btn-close"></button>
+            </header>
+            <section class="modal-card-body">
+                <form action="Controller?accion=Registrar" method="post" enctype="form-data">
+                    <div class="field">
+                        <label class="label">Tipo de Documento</label>
+                        <div class="control">
+                            <div class="select">
+                                <select name="tipo_doc">
+                                    <option value="dni">DNI</option>
+                                    <option value="cuit">CUIT</option>
+                                </select>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="field">
+                        <label class="label">Número de Documento</label>
+                        <div class="control">
+                            <input class="input" type="text" name="numero_doc" placeholder="Número de documento" required>
+                        </div>
+                    </div>
+                    <div class="field">
+                        <label class="label">Nombre</label>
+                        <div class="control">
+                            <input class="input" type="text" name="nombre" placeholder="Nombre" required>
+                        </div>
+                    </div>
+                    <div class="field">
+                        <label class="label">Apellido</label>
+                        <div class="control">
+                            <input class="input" type="text" name="apellido" placeholder="Apellido" required>
+                        </div>
+                    </div>
+                    <div class="field">
+                        <label class="label">Email</label>
+                        <div class="control">
+                            <input class="input" type="email" name="email" placeholder="Email" required>
+                        </div>
+                    </div>
+                    <div class="field">
+                        <label class="label">Teléfono</label>
+                        <div class="control">
+                            <input class="input" type="text" name="telefono" placeholder="Teléfono" required>
+                        </div>
+                    </div>
+                    <div class="field">
+                        <label class="label">Contraseña</label>
+                        <div class="control">
+                            <input class="input" type="password" id="password" name="password" placeholder="Contraseña" required>
+                        </div>
+                    </div>
+                    <div class="field">
+                        <label class="label">Confirmar Contraseña</label>
+                        <div class="control">
+                            <input class="input" type="password" id="confirm-password" placeholder="Confirmar contraseña" required>
+                        </div>
+                        <p class="help is-danger" id="password-error" style="display: none;">Las contraseñas no coinciden</p>
+                    </div>                   
+                    <div class="field is-grouped">
+                        <div class="control">
+                            <button type="submit" class="button is-link">Registrar</button>
+                        </div>
+                        <div class="control">
+                            <button type="button" class="button is-light" id="btn-cancel">Cancelar</button>
+                        </div>
+                    </div>
+                </form>
+            </section>
+        </div>
+    </div>
+    
+	<div class="modal" id="signInModal">
+	    <div class="modal-background"></div>
+	    <div class="modal-card">
+	        <header class="modal-card-head">
+	            <p class="modal-card-title">Sign in</p>
+	            <button class="delete" aria-label="close" id="closeSignInModal"></button>
+	        </header>
+	        <section class="modal-card-body">
+	            <form id="signInForm" method="post" action="Controller">
+	                <div class="field">
+	                    <label class="label">Email</label>
+	                    <div class="control">
+	                        <input class="input" type="email" name="email" placeholder="e.g. john@example.com" required>
+	                    </div>
+	                </div>
+	                <div class="field">
+	                    <label class="label">Password</label>
+	                    <div class="control">
+	                        <input class="input" type="password" name="password" placeholder="********" required>
+	                    </div>
+	                </div>
+	                <input type="hidden" name="accion" value="SignIn">
+	                <footer class="modal-card-foot">
+	                    <button type="submit" class="button is-primary">Sign in</button>
+	                    <button type="button" class="button" id="cancelSignIn">Cancel</button>
+	                </footer>
+	            </form>
+	        </section>
+	    </div>
+	</div>
+	
+	
+	<script>
+	    document.addEventListener('DOMContentLoaded', () => {
+	        // Referencias a elementos
+	        const signInButton = document.getElementById('signInButton');
+	        const signInModal = document.getElementById('signInModal');
+	        const closeSignInModal = document.getElementById('closeSignInModal');
+	        const cancelSignIn = document.getElementById('cancelSignIn');
+	
+	        // Mostrar modal de Sign in
+	        signInButton.addEventListener('click', () => {
+	            signInModal.classList.add('is-active');
+	        });
+	
+	        // Cerrar modal de Sign in
+	        closeSignInModal.addEventListener('click', () => {
+	            signInModal.classList.remove('is-active');
+	        });
+	        cancelSignIn.addEventListener('click', () => {
+	            signInModal.classList.remove('is-active');
+	        });
+	    });
+	</script>
+	
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            const modal = document.getElementById('modal-register');
+            const btnSignUp = document.getElementById('btn-signup');
+            const btnClose = document.getElementById('btn-close');
+            const btnCancel = document.getElementById('btn-cancel');
+            const form = document.getElementById('register-form');
+            const password = document.getElementById('password');
+            const confirmPassword = document.getElementById('confirm-password');
+            const passwordError = document.getElementById('password-error');
+
+            // Abrir modal
+            btnSignUp.addEventListener('click', () => {
+                modal.classList.add('is-active');
+            });
+
+            // Cerrar modal
+            btnClose.addEventListener('click', () => {
+                modal.classList.remove('is-active');
+            });
+
+            btnCancel.addEventListener('click', () => {
+                modal.classList.remove('is-active');
+            });
+
+            // Validar que las contraseñas coincidan antes de enviar el formulario
+            form.addEventListener('submit', (e) => {
+                if (password.value !== confirmPassword.value) {
+                    e.preventDefault();
+                    passwordError.style.display = 'block';
+                } else {
+                    passwordError.style.display = 'none';
+                }
+            });
+        });
+    </script>
+
     <script>
         function openModal() {
             document.getElementById('addProductModal').classList.add('is-active');
@@ -303,6 +512,15 @@
                 }
             }
         });
+        
+        function abrirModalConfirmacion(id) {
+            document.getElementById('deleteProductoId').value = id;
+            document.getElementById('modalConfirmacion').classList.add('is-active');
+        }
+
+        function cerrarModalConfirmacion() {
+            document.getElementById('modalConfirmacion').classList.remove('is-active');
+        }
     </script>
     <script>
         document.addEventListener('DOMContentLoaded', () => {
@@ -327,7 +545,15 @@
         });
     </script>
     
-    
+<% }else { %>    
+		<div class="container">
+	        <div class="notification is-danger">
+	            <p>No tienes permiso para ver esta página. Por favor, contacta a un administrador si crees que esto es un error.</p>
+	        </div>
+	    </div>
+    <%
+        }
+    %>
 </body>
 </html>    
   

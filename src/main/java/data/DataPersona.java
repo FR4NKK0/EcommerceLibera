@@ -97,6 +97,49 @@ public class DataPersona {
 		return p;
 	}
 	
+	public Persona getById(Persona per) {
+		DataRol dr=new DataRol();
+		Persona p=null;
+		PreparedStatement stmt=null;
+		ResultSet rs=null;
+		try {
+			stmt=DbConnector.getInstancia().getConn().prepareStatement(
+					"select id,nombre,apellido,tipo_doc,nro_doc,email,tel,habilitado from persona where id= ?"
+					);
+			stmt.setString(1, per.getEmail());
+			stmt.setString(2, per.getPassword());
+			rs=stmt.executeQuery();
+			if(rs!=null && rs.next()) {
+				p=new Persona();
+				p.setDocumento(new Documento());
+				p.setId(rs.getInt("id"));
+				p.setNombre(rs.getString("nombre"));
+				p.setApellido(rs.getString("apellido"));
+				p.getDocumento().setTipo(rs.getString("tipo_doc"));
+				p.getDocumento().setNro(rs.getString("nro_doc"));
+				p.setEmail(rs.getString("email"));
+				p.setTel(rs.getString("tel"));
+				p.setHabilitado(rs.getBoolean("habilitado"));
+				//
+				dr.setRoles(p);
+			}
+		} catch (SQLException e) {
+			e.printStackTrace();
+		}finally {
+			try {
+				if(rs!=null) {rs.close();}
+				if(stmt!=null) {stmt.close();}
+				DbConnector.getInstancia().releaseConn();
+			} catch (SQLException e) {
+				e.printStackTrace();
+			}
+		}
+		
+		return p;
+	}
+	
+	
+	
 	public Persona getByDocumento(Persona per) {
 		DataRol dr=new DataRol();
 		Persona p=null;
@@ -310,6 +353,28 @@ public class DataPersona {
 			stmt.setString(7, p.getTel());
 			stmt.setBoolean(8, p.isHabilitado());
 			stmt.setInt(9, p.getId());
+			stmt.executeUpdate();
+		} catch (SQLException e) {
+            e.printStackTrace();
+		} finally {
+            try {
+                if(stmt!=null)stmt.close();
+                DbConnector.getInstancia().releaseConn();
+            } catch (SQLException e) {
+            	e.printStackTrace();
+            }
+		}
+	return p;	
+	}
+	
+	public Persona ToggleHabilitado(Persona p) {
+		PreparedStatement stmt= null;
+		try {
+			stmt=DbConnector.getInstancia().getConn().
+					prepareStatement(
+							"UPDATE persona SET habilitado=? WHERE id=?");
+			stmt.setBoolean(1, p.isHabilitado());
+			stmt.setInt(2, p.getId());
 			stmt.executeUpdate();
 		} catch (SQLException e) {
             e.printStackTrace();

@@ -1,5 +1,7 @@
 <%@ page language="java" contentType="text/html; charset=UTF-8" pageEncoding="UTF-8"%>
 <%@ page import="entities.*" %>
+<%@ page import="data.*" %>
+
 <!DOCTYPE html>
 <html>
 <head>
@@ -38,6 +40,19 @@
     </style>
 </head>
 <body>
+<% 
+ Persona user = (Persona) session.getAttribute("user");
+boolean isAdmin = false;
+if (user != null) {
+    Rol rol = new Rol();
+    rol.setDescripcion("admin");
+    DataRol dataRol = new DataRol();
+    rol = dataRol.getByDesc(rol);
+    isAdmin = user.hasRol(rol);
+}
+
+if (isAdmin) {
+%>
     <div class="container">
         <div class="form-section">
             <h1 class="title">Editar Producto</h1>
@@ -133,5 +148,16 @@
             }
         });
     </script>
+    
+    
+    <% }else { %>    
+		<div class="container">
+	        <div class="notification is-danger">
+	            <p>No tienes permiso para ver esta página. Por favor, contacta a un administrador si crees que esto es un error.</p>
+	        </div>
+	    </div>
+    <%
+        }
+    %>
 </body>
 </html>

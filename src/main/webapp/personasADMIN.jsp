@@ -173,133 +173,115 @@
         if (isAdmin) {
     %>
     
-     <div class="container">
-                    <div class="level">
-                        <div class="level-left">
-                            <h3 class="title is-4">Lista de Categorías</h3>
-                        </div>
-                        <div class="level-right">
-                            <button class="button is-primary" onclick="openModalCategoria()">
-                                <span class="icon">
-                                    <i class="fas fa-plus"></i>
-                                </span>
-                                <span>Agregar Nueva Categoría</span>
-                            </button>
-                        </div>
+    <div class="container">
+    <div class="form-section">
+        <div class="table-container">
+            <form action="Controller?accion=ListarPersonas" method="post" class="is-pulled-right">
+                <div class="field is-grouped">
+                    <div class="control is-pulled-right">                       
                     </div>
-                    
-                    <div class="table-container">
-                        <table class="table is-striped is-bordered is-hoverable is-fullwidth">
-                            <thead>
-                                <tr>
-                                    <th>ID</th>
-                                    <th>Nombre</th>
-                                    <th>Acciones</th>
-                                </tr>
-                            </thead>
-                            <tbody>
-                                <% 
-                                    List<Categoria> categorias = (List<Categoria>) request.getAttribute("categorias");
-                                    if (categorias != null) {
-                                        for (Categoria c : categorias) {
-                                %>
-                                <tr>
-                                    <td><%= c.getId() %></td>
-                                    <td><%= c.getNombre() %></td>
-                                    <td>
-                                        <form action="Controller" method="post">
-                                        <input type="hidden" name="id" value="<%= c.getId() %>">
-                                        <div class="field is-grouped">
-                                            
-                                                <div class="control">
-											        <button class="button is-small is-link" type="button" onclick="abrirModalEditCategoria('<%= c.getId() %>', '<%= c.getNombre() %>')">Edit</button>
-											    </div>
-                                            
-                                            <div class="control">
-                                                <button class="button is-small is-danger" type="button" onclick="abrirModalConfirmacion('<%= c.getId() %>')">Delete</button>
-                                            </div>
-                                        </div>
-                                    </form>
-                                    </td>
-                                </tr>
-                                <% 
-                                        }
-                                    }
-                                %>
-                            </tbody>
-                        </table>
-                    </div>
-                </div>   
-      
-	<div id="modalConfirmacion" class="modal">
-	    <div class="modal-background"></div>
-	    <div class="modal-card">
-	        <header class="modal-card-head">
-	            <p class="modal-card-title">Confirmar Eliminación</p>
-	            <button class="delete" aria-label="close" onclick="cerrarModalConfirmacion()"></button>
-	        </header>
-	        <section class="modal-card-body">
-	            <p>¿Estás seguro de que deseas eliminar esta categoría? Esta acción no se puede deshacer.</p>
-	        </section>
-	        <footer class="modal-card-foot">
-	            <!-- Formulario de eliminación -->
-	            <form id="formDeleteCategoria" action="Controller" method="post">
-	                <input type="hidden" name="id" id="deleteCategoriaId">
-	                <button class="button is-danger" type="submit" name="accion" value="DeleteCategoria">Eliminar</button>
-	                <button class="button" type="button" onclick="cerrarModalConfirmacion()">Cancelar</button>
-	            </form>
-	        </footer>
-	    </div>
-	</div>      
-                
-    <div id="modalEditCategoria" class="modal">
-	    <div class="modal-background"></div>
-	    <div class="modal-card">
-	        <header class="modal-card-head">
-	            <p class="modal-card-title">Editar Categoría</p>
-	            <button class="delete" aria-label="close" onclick="cerrarModalEditCategoria()"></button>
-	        </header>
-	        <form action="Controller" method="post">
-	            <section class="modal-card-body">
-	                <!-- Campo oculto para el ID de la categoría -->
-	                <input type="hidden" name="id" id="categoriaId">
-	                <div class="field">
-	                    <label class="label">Nombre de la Categoría</label>
-	                    <div class="control">
-	                        <input class="input" type="text" name="nombre" id="categoriaNombre" required>
-	                    </div>
-	                </div>
-	            </section>
-	            <footer class="modal-card-foot">
-	                <button class="button is-success" type="submit" name="accion" value="EditCategoria">Guardar cambios</button>
-	                <button class="button" type="button" onclick="cerrarModalEditCategoria()">Cancelar</button>
-	            </footer>
-	        </form>
-	    </div>
-	</div>
-                
-<div id="modalCategoria" class="modal">
-    <div class="modal-background" onclick="closeModalCategoria()"></div>
+                </div>
+            </form>
+            <h3 class="title is-4">Lista de Personas</h3>
+            <hr>
+
+            <table class="table is-striped is-bordered is-hoverable is-fullwidth">
+                <thead>
+                    <tr>
+                        <th>ID</th>
+                        <th>Documento</th>
+                        <th>Nombre</th>
+                        <th>Apellido</th>
+                        <th>Email</th>
+                        <th>Teléfono</th>
+                        <th>Habilitado</th>
+                        <th>Roles</th>
+                        <th>Acciones</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <% 
+                        LinkedList<Persona> personas = (LinkedList<Persona>) request.getAttribute("personas");
+                        if (personas != null) {
+                            for (Persona p : personas) {
+                    %>
+                    <tr>
+                        <td><%= p.getId() %></td>
+                        <td><%= p.getDocumento().getTipo() + ": " + p.getDocumento().getNro() %></td>
+                        <td><%= p.getNombre() %></td>
+                        <td><%= p.getApellido() %></td>
+                        <td><%= p.getEmail() %></td>
+                        <td><%= p.getTel() %></td>
+                        <td><%= p.isHabilitado() ? "Sí" : "No" %></td>
+                        <td>
+                            <% 
+                                for (Map.Entry<Integer, Rol> entry : p.roles.entrySet()) {
+                                    out.print(entry.getValue().getDescripcion() + "<br>");
+                                }
+                            %>
+                        </td>
+                        <td>
+                            <div class="field is-grouped">
+                                <div class="control">
+                                    <button class="button is-link is-small" onclick="asignarRol(<%= p.getId() %>)">
+                                        <span class="icon is-small">
+                                            <i class="fas fa-user-tag"></i>
+                                        </span>
+                                        <span>Asignar Rol</span>
+                                    </button>
+                                    <button class="button is-danger is-small" onclick="quitarRol(<%= p.getId() %>)">
+									    <span class="icon is-small">
+									        <i class="fas fa-user-minus"></i>
+									    </span>
+									    <span>Quitar Rol</span>
+									</button>
+									<button class="button is-warning is-small" onclick="toggleHabilitado(<%= p.getId() %>, <%= p.isHabilitado() %>)">
+						                <span class="icon is-small">
+						                    <i class="fas fa-toggle-on"></i>
+						                </span>
+						                <span>Toggle Habilitado</span>
+						            </button>
+                                </div>
+                            </div>
+                        </td>
+                    </tr>
+                    <% 
+                            }
+                        }
+                    %>
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+
+<div id="modalAsignarRol" class="modal">
+    <div class="modal-background"></div>
     <div class="modal-card">
-        <div class="box">
-                <h3 class="title is-4">Agregar Nueva Categoria</h3>
-                <form action="Controller?accion=CrearCategoria" method="post" >
-                    <div class="field">
-                        <label class="label">Nombre:</label>
-                        <div class="control">
-                            <input class="input" type="text" name="txtNom" required>
+        <header class="modal-card-head">
+            <p class="modal-card-title">Asignar Rol</p>
+            <button class="delete" aria-label="close" onclick="closeModalAsignarRol()"></button>
+        </header>
+        <section class="modal-card-body">
+            <form id="formAsignarRol">
+                <input type="hidden" id="personaId" name="id">
+                <div class="field">
+                    <label class="label">Rol</label>
+                    <div class="control">
+                        <div class="select">
+                            <select id="rolDescripcion" name="rolDescripcion">
+                                <option value="user">User</option>
+                                <option value="admin">Admin</option>
+                            </select>
                         </div>
                     </div>
-        <div class="field is-grouped">
-                        <div class="control">
-                            <button class="button is-link" type="submit" name="accion" value="CrearCategoria">Guardar</button>
-                        </div>
-                        <div class="control">
-                            <button class="button is-light" type="button" onclick="closeModalCategoria()">Cancelar</button>
-                        </div>
-                    </div>
-                </form>
-              </div>
+                </div>
+            </form>
+        </section>
+        <footer class="modal-card-foot">
+            <button class="button is-success" onclick="guardarRol()">Guardar</button>
+            <button class="button" onclick="closeModalAsignarRol()">Cancelar</button>
+        </footer>
     </div>
 </div>
 
@@ -470,44 +452,96 @@
         });
     </script>
 
-<script type="text/javascript">
 
-
-function openModalCategoria() {
-    document.getElementById('modalCategoria').classList.add('is-active');
+<script>
+function asignarRol(id) {
+    document.getElementById('personaId').value = id;
+    openModalAsignarRol();
 }
 
-// Función para cerrar el modal
-function closeModalCategoria() {
-    document.getElementById('modalCategoria').classList.remove('is-active');
+function openModalAsignarRol() {
+    document.getElementById('modalAsignarRol').classList.add('is-active');
 }
 
-
-
-function abrirModalEditCategoria(id, nombre) {
-    document.getElementById('categoriaId').value = id;
-    document.getElementById('categoriaNombre').value = nombre;
-    document.getElementById('modalEditCategoria').classList.add('is-active');
+function closeModalAsignarRol() {
+    document.getElementById('modalAsignarRol').classList.remove('is-active');
 }
 
-function cerrarModalEditCategoria() {
-    document.getElementById('modalEditCategoria').classList.remove('is-active');
+function guardarRol() {
+    const formData = new FormData(document.getElementById('formAsignarRol'));
+    
+    fetch('Controller?accion=AsignarRol', {
+        method: 'POST',
+        body: formData
+    })
+    .then(response => response.text())
+    .then(data => {
+        if (data.startsWith('SUCCESS')) {
+            alert('Rol asignado exitosamente');
+            closeModalAsignarRol();
+            location.reload(); // Recargar la página para mostrar los cambios
+        } else {
+            alert('Error al asignar el rol: ' + data);
+        }
+    })
+    .catch((error) => {
+        console.error('Error:', error);
+        alert('Ocurrió un error al asignar el rol');
+    });
 }
 
-function abrirModalConfirmacion(id) {
-    // Asigna el ID de la categoría al campo oculto del formulario de eliminación
-    document.getElementById('deleteCategoriaId').value = id;
+function quitarRol(id) {
+    const rolDescripcion = prompt("Ingrese el rol a quitar (user o admin):");
+    if (rolDescripcion !== null && (rolDescripcion === "user" || rolDescripcion === "admin")) {
+        const formData = new FormData();
+        formData.append('id', id);
+        formData.append('rolDescripcion', rolDescripcion);
 
-    // Muestra el modal de confirmación
-    document.getElementById('modalConfirmacion').classList.add('is-active');
+        fetch('Controller?accion=QuitarRol', {
+            method: 'POST',
+            body: formData
+        })
+        .then(response => response.text())
+        .then(data => {
+            if (data.startsWith('SUCCESS')) {
+                alert('Rol quitado exitosamente');
+                location.reload(); // Recargar la página para mostrar los cambios
+            } else {
+                alert('Error al quitar el rol: ' + data);
+            }
+        })
+        .catch((error) => {
+            console.error('Error:', error);
+            alert('Ocurrió un error al quitar el rol');
+        });
+    }
 }
 
-function cerrarModalConfirmacion() {
-    // Oculta el modal de confirmación
-    document.getElementById('modalConfirmacion').classList.remove('is-active');
+function toggleHabilitado(id, estadoActual) {
+    if (confirm('¿Está seguro que desea cambiar el estado de habilitación de esta persona?')) {
+        fetch('Controller?accion=ToggleHabilitado', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/x-www-form-urlencoded',
+            },
+            body: 'id=' + id + '&estadoActual=' + estadoActual
+        })
+        .then(response => response.text())
+        .then(data => {
+            if (data.startsWith('SUCCESS')) {
+                alert('Estado de habilitación cambiado exitosamente');
+                location.reload();
+            } else {
+                alert('Error al cambiar el estado de habilitación: ' + data);
+            }
+        })
+        .catch((error) => {
+            console.error('Error:', error);
+            alert('Ocurrió un error al cambiar el estado de habilitación');
+        });
+    }
 }
 </script>
-
 <%
         } else {
     %>

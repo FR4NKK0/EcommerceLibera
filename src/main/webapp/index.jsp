@@ -2,6 +2,7 @@
     pageEncoding="ISO-8859-1"%>
 <%@ page import="entities.*" %>
 <%@ page import="java.util.*" %>
+<%@ page import="data.*" %>
 
 <!DOCTYPE html>
 <html>
@@ -66,16 +67,20 @@
                                 Sign in
                             </a>
                         <% 
-                            } else { 
+                            } else {
+                            	boolean isAdmin = false;
+                            	Rol rol= new Rol();
+                            	rol.setDescripcion("admin");
+                            	DataRol dataRol= new DataRol();
+                            	rol=dataRol.getByDesc(rol);
+                            	isAdmin = user.hasRol(rol);
                         %>
-                            <!-- Mostrar opciones si el usuario está logueado -->
                             <a class="nav-link button is-light" href="Controller?accion=Carrito">
                                 <i class="fas fa-cart-plus">
                                 (<label style="color: orange"> ${contador} </label>)</i>Carrito                          
                             </a>
                             
-                            <% if (user.isHabilitado()) { %>
-                                <!-- Mostrar Management si el usuario está habilitado -->
+                            <% if (isAdmin) { %>
                                 <div class="navbar-item has-dropdown is-hoverable">
                                 <a class="navbar-link">
                                     <i ></i> Management
@@ -86,6 +91,9 @@
                                     </a>
                                     <a class="navbar-item" href="Controller?accion=ListarCategorias">
                                         Categorias
+                                    </a>
+                                    <a class="navbar-item" href="Controller?accion=ListarPersonas">
+                                        Usuarios
                                     </a>
                                 	</div>
                                 </div>
@@ -115,6 +123,7 @@
             </div>
         </div>
     </nav>
+    
    <section class="section">
 	    <div class="container">
 	        <h1 class="title">Catálogo de Productos</h1>

@@ -13,6 +13,7 @@ import logic.Login;
 
 import java.io.IOException;
 import java.io.InputStream;
+import java.io.PrintWriter;
 import java.util.*;
 import entities.*;
 import data.*;
@@ -27,8 +28,10 @@ public class Controller extends HttpServlet {
     private DataProducto dp = new DataProducto();
     private DataCategoria dc = new DataCategoria();
     private DataCompra dcompra = new DataCompra();
+    private DataRol dr = new DataRol();
     private List<Carrito> listaCarrito = new ArrayList<>();
     private Login ctrl= new Login();
+    Rol rol= new Rol();
     int item;
     double totalPagar=0.0;
     int cantidad = 1;
@@ -39,7 +42,7 @@ public class Controller extends HttpServlet {
     int idPago;
     int rpago=0;
      FechaHoy fechaSistema= new FechaHoy();
-
+     private List<Persona> personas = new LinkedList<>();
     public Controller() {
         super();
     }
@@ -119,12 +122,107 @@ public class Controller extends HttpServlet {
             case "DeleteCategoria":
             	deleteCategoria(request, response);
             break;
+            case "ListarPersonas":
+            	listarPersonas(request, response);
+            	break;
+            case "AsignarRol":
+            	asignarRol(request, response);
+            	break;
+            case "QuitarRol":
+            	quitarRol(request, response);
+            	break;
+            case "DeleteProducto":
+            	eliminarProducto(request, response);
+            	break;
+            case "ToggleHabilitado":
+            	toggleHabilitado(request, response);
+                break;
             default:
                 listarCatalogo(request, response);
                 break;
         }
     }
     
+    private void toggleHabilitado(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
+        response.setContentType("text/plain");
+        PrintWriter out = response.getWriter();
+        try {
+            int personaId = Integer.parseInt(request.getParameter("id"));
+            boolean estadoActual = Boolean.parseBoolean(request.getParameter("estadoActual"));     
+            Persona persona = new Persona();
+            persona.setId(personaId);
+            persona.setHabilitado(!estadoActual); 
+            personaDAO.ToggleHabilitado(persona);
+            out.print("SUCCESS: Estado de habilitación cambiado correctamente");
+        } catch (Exception e) {
+            out.print("ERROR: " + e.getMessage());
+            e.printStackTrace();
+        }
+    }
+    
+    private void quitarRol(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
+        response.setContentType("text/plain");
+        PrintWriter out = response.getWriter();
+        
+        try {
+            int personaId = Integer.parseInt(request.getParameter("id"));
+            String rolDescripcion = request.getParameter("rolDescripcion");
+            
+            Persona persona = new Persona();
+            persona.setId(personaId);
+            Rol rol = new Rol();
+            rol.setDescripcion(rolDescripcion);
+            rol = dr.getByDesc(rol);
+            
+            if (rol != null) {
+                dr.removeRol(persona, rol);
+                out.print("SUCCESS: Rol quitado correctamente");
+            } else {
+                out.print("ERROR: Rol no encontrado");
+            }
+        } catch (Exception e) {
+            out.print("ERROR: " + e.getMessage());
+            e.printStackTrace();
+        }
+    }
+    
+    private void listarPersonas(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
+    	try {
+    		List<Persona> personas = personaDAO.getAll();
+    		 request.setAttribute("personas", personas);
+             request.getRequestDispatcher("personasADMIN.jsp").forward(request, response);
+    	}catch(Exception e){
+    		e.printStackTrace();
+    	}
+    }
+    
+    private void asignarRol(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
+        response.setContentType("text/plain");
+        
+        try (PrintWriter out = response.getWriter()) { 
+            int personaId = Integer.parseInt(request.getParameter("id"));
+            String rolDescripcion = request.getParameter("rolDescripcion");
+            
+            Persona perNewrol = new Persona();
+            perNewrol.setId(personaId);
+            
+            Rol rol = new Rol();
+            rol.setDescripcion(rolDescripcion);
+            rol = dr.getByDesc(rol);
+            
+            perNewrol.addRol(rol);
+            dr.añadirRol(perNewrol);
+            
+
+            out.write("SUCCESS: Rol asignado correctamente");
+        } catch (Exception e) {
+            response.setStatus(HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
+            try (PrintWriter out = response.getWriter()) {
+                out.write("ERROR: " + e.getMessage());
+            }
+            e.printStackTrace();
+        }
+    }
     
     private void deleteCategoria(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
     	try {
@@ -254,32 +352,26 @@ public class Controller extends HttpServlet {
 
 	private void signIn(HttpServletRequest request, HttpServletResponse response)throws ServletException, IOException {
     	 try {
-    	        // Obtener los datos del formulario
     	        String email = request.getParameter("email");
     	        String password = request.getParameter("password");
 
-    	        // Validar que los campos no estén vacíos
     	        if (email == null || email.isEmpty() || password == null || password.isEmpty()) {
     	            request.setAttribute("mensajeError", "Email y contraseña son obligatorios.");
     	            request.getRequestDispatcher("index.jsp").forward(request, response);
     	            return;
     	        }
 
-    	        // Configurar la persona con los datos ingresados
     	        persona.setEmail(email);
     	        persona.setPassword(password);
 
-    	        // Validar las credenciales
     	        persona = ctrl.validate(persona);
 
-    	        if (persona != null /*&& persona.isHabilitado()*/) {
-    	            // Iniciar la sesión y redirigir al catálogo
+    	        if (persona != null && persona.isHabilitado()) {
     	            request.getSession().setAttribute("user", persona);
     	            response.sendRedirect("Controller?accion=ListarCatalogo");
     	            System.out.println("Persona logueada");
     	            System.out.println(persona.getApellido());
     	        } else {
-    	            // Si no se encuentra la persona o no está habilitada, redirigir con mensaje de error
     	            request.setAttribute("mensajeError", "Email o contraseña incorrectos, o usuario no habilitado.");
     	            request.getRequestDispatcher("index.jsp").forward(request, response);
     	        }
@@ -598,7 +690,13 @@ public class Controller extends HttpServlet {
     }
     
     private void eliminarProducto(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
-        // Implementar lógica de eliminación aquí
+        try {
+    	int idDeleteP = Integer.parseInt(request.getParameter("id"));
+        dp.delete(idDeleteP);
+        
         listarProductos(request, response);
+        }catch(Exception e) {
+        	e.printStackTrace();
+        }
     }
 }
