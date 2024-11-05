@@ -137,10 +137,52 @@ public class Controller extends HttpServlet {
             case "ToggleHabilitado":
             	toggleHabilitado(request, response);
                 break;
+            case "GuardarTarjeta":
+            	addTarjeta(request, response);
+            	break;
+            case "AñadirSaldo":
+            	agregarSaldo(request, response);
+            	break;
             default:
                 listarCatalogo(request, response);
                 break;
         }
+    }
+    
+    private void agregarSaldo(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
+    	try {
+    	String numeroTarjeta = request.getParameter("numeroTarjeta");
+    	double nuevoSaldo = Double.parseDouble(request.getParameter("saldoAgregar"));
+    	Tarjeta tnuevoSaldo = new Tarjeta();
+    	tnuevoSaldo = dcompra.GetTarjeta(numeroTarjeta);
+    	//System.out.println("Entre");
+    	nuevoSaldo = nuevoSaldo + tnuevoSaldo.getSaldo();
+    	dcompra.ActualizaSaldo(nuevoSaldo, tnuevoSaldo.getId());
+    	response.setContentType("text/plain");
+        response.getWriter().write("Nuevo saldo $" + nuevoSaldo + " en la tarjeta " + numeroTarjeta + " agregado exitosamente.");
+    	}catch(Exception e) {
+    		e.printStackTrace();
+    	}
+    }
+    
+    private void addTarjeta(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
+    	try {
+    		 String numeroTarjeta = request.getParameter("numeroTarjeta");
+    		 String nombreTarjeta = request.getParameter("nombreTarjeta");
+    		 String fechaTarjeta = request.getParameter("fechaTarjeta");
+    		 String codigoCVV = request.getParameter("cvvTarjeta");
+    		 double saldoInicial = Double.parseDouble(request.getParameter("saldoTarjeta"));
+    		 Tarjeta t = new Tarjeta();
+    		 t.setNumero(numeroTarjeta);
+    		 t.setNombre(nombreTarjeta);
+    		 t.setFecha(fechaTarjeta);
+    		 t.setCodigo(codigoCVV);
+    		 t.setSaldo(saldoInicial);
+    		 dcompra.addTarjeta(t);
+    		 request.getRequestDispatcher("Controller?accion=ListarCatalogo").forward(request, response);
+    	}catch(Exception e) {
+    		e.printStackTrace();
+    	}
     }
     
     private void toggleHabilitado(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {

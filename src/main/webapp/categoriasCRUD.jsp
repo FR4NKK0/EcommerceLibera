@@ -144,6 +144,12 @@
                                     <a class="navbar-item" href="Controller?accion=Perfil">
                                         Mi perfil
                                     </a>
+                                    <a class="navbar-item" onclick="openModalTarjeta()">
+									    Añadir Tarjeta
+									</a>
+                                    <a class="navbar-item"  onclick="openModalAgregarSaldo()">
+									    Agregar Saldo
+									</a>
                                     <a class="navbar-item" href="Controller?accion=MisCompras">
                                         Mis compras
                                     </a>
@@ -410,6 +416,107 @@
 	    </div>
 	</div>
 	
+	<div class="modal" id="addTarjetaModal">
+	    <div class="modal-background"></div>
+		    <div class="modal-content">
+		        <div class="box">
+		            <h3 class="title is-4">Agregar Nueva Tarjeta</h3>
+		            <form action="Controller?accion=GuardarTarjeta" method="post">
+		                <div class="field">
+                    <label class="label">Número de Tarjeta:</label>
+	                    <div class="control">
+		                        <input class="input" type="text" name="numeroTarjeta" id="numeroTarjeta" required 
+		                               pattern="[0-9]{4}-[0-9]{4}-[0-9]{4}-[0-9]{4}" 
+		                               title="Formato: xxxx-xxxx-xxxx-xxxx"
+		                               placeholder="xxxx-xxxx-xxxx-xxxx"
+		                               maxlength="19">
+		                    </div>
+		                </div>
+		                <div class="field">
+		                    <label class="label">Nombre del titular de la tarjeta:</label>
+		                    <div class="control">
+		                        <input class="input" type="text" name="nombreTarjeta" required>
+		                    </div>
+		                </div>
+		                <div class="field">
+		                    <label class="label">Fecha de Vencimiento:</label>
+		                    <div class="control">
+		                        <input class="input" type="text" name="fechaTarjeta" required pattern="(0[1-9]|1[0-2])\/[0-9]{2}" title="Formato MM/YY">
+		                    </div>
+		                </div>
+		                <div class="field">
+		                    <label class="label">CVV:</label>
+		                    <div class="control">
+		                        <input class="input" type="text" name="cvvTarjeta" required pattern="\d{3,4}" title="3 o 4 dígitos">
+		                    </div>
+		                </div>
+		                <div class="field">
+		                    <label class="label">Saldo Inicial:</label>
+		                    <div class="control">
+		                        <input class="input" type="number" name="saldoTarjeta" step="0.01" required>
+		                    </div>
+		                </div>
+		                <div class="field is-grouped">
+		                    <div class="control">
+		                        <button class="button is-link" type="submit">Guardar</button>
+		                    </div>
+		                    <div class="control">
+		                        <button class="button is-light" type="button" onclick="closeModalTarjeta()">Cancelar</button>
+		                    </div>
+		                </div>
+		            </form>
+		        </div>
+		    </div>
+	    <button class="modal-close is-large" aria-label="close" onclick="closeModalTarjeta()"></button>
+	</div>
+    
+    <div class="modal" id="agregarSaldoModal">
+	    <div class="modal-background"></div>
+		    <div class="modal-content">
+		        <div class="box">
+		            <h3 class="title is-4">Agregar Saldo</h3>
+		            <form id="agregarSaldoForm" action="Controller?accion=AñadirSaldo" method="post">
+		                <div class="field">
+		                    <label class="label">Número de Tarjeta:</label>
+		                    <div class="control">
+		                        <input class="input" type="text" name="numeroTarjeta" id="numeroTarjetaSaldo" required 
+		                               pattern="[0-9]{4}-[0-9]{4}-[0-9]{4}-[0-9]{4}" 
+		                               title="Formato: 2222-2222-2222-2222"
+		                               placeholder="2222-2222-2222-2222"
+		                               maxlength="19">
+		                    </div>
+		                </div>
+		                <div class="field">
+		                    <label class="label">Saldo a Agregar:</label>
+		                    <div class="control">
+		                        <input class="input" type="number" name="saldoAgregar" step="0.01" min="0.01" required>
+		                    </div>
+		                </div>
+		                <div class="field is-grouped">
+		                    <div class="control">
+		                        <button class="button is-link" type="submit">Agregar Saldo</button>
+		                    </div>
+		                    <div class="control">
+		                        <button class="button is-light" type="button" onclick="closeModalAgregarSaldo()">Cancelar</button>
+		                    </div>
+		                </div>
+		            </form>
+		        </div>
+		    </div>
+	    <button class="modal-close is-large" aria-label="close" onclick="closeModalAgregarSaldo()"></button>
+	</div>
+	
+	<div class="modal" id="confirmacionModal">
+	    <div class="modal-background"></div>
+	    <div class="modal-content">
+	        <div class="box">
+	            <h3 class="title is-4">Confirmación</h3>
+	            <p id="mensajeConfirmacion"></p>
+	            <button class="button is-success" onclick="closeConfirmacionModal()">Aceptar</button>
+	        </div>
+	    </div>
+	</div>
+	
 	<script>
 	    document.addEventListener('DOMContentLoaded', () => {
 	        // Referencias a elementos
@@ -506,6 +613,85 @@ function cerrarModalConfirmacion() {
     // Oculta el modal de confirmación
     document.getElementById('modalConfirmacion').classList.remove('is-active');
 }
+</script>
+<script>
+function openModalTarjeta() {
+    document.getElementById('addTarjetaModal').classList.add('is-active');
+}
+
+function closeModalTarjeta() {
+    document.getElementById('addTarjetaModal').classList.remove('is-active');
+}
+
+document.addEventListener('DOMContentLoaded', (event) => {
+    var modals = document.querySelectorAll('.modal-background, .modal-close');
+    modals.forEach(function(el) {
+        el.addEventListener('click', function() {
+            closeModalTarjeta();
+        });
+    });
+
+    document.querySelector('#addTarjetaModal form').addEventListener('submit', function(e) {
+        if (!this.checkValidity()) {
+            e.preventDefault();
+            alert('Por favor, complete todos los campos correctamente.');
+        }
+    });
+});
+
+function openModalAgregarSaldo() {
+    document.getElementById('agregarSaldoModal').classList.add('is-active');
+}
+
+function closeModalAgregarSaldo() {
+    document.getElementById('agregarSaldoModal').classList.remove('is-active');
+}
+
+function openConfirmacionModal(mensaje) {
+    document.getElementById('mensajeConfirmacion').textContent = mensaje;
+    document.getElementById('confirmacionModal').classList.add('is-active');
+}
+
+function closeConfirmacionModal() {
+    document.getElementById('confirmacionModal').classList.remove('is-active');
+    location.reload(); 
+}
+
+document.addEventListener('DOMContentLoaded', (event) => {
+    document.getElementById('numeroTarjetaSaldo').addEventListener('input', function (e) {
+        var target = e.target, position = target.selectionEnd,
+            length = target.value.length;
+        
+        target.value = target.value.replace(/[^\d]/g, '').replace(/(.{4})/g, '$1-').trim();
+        target.value = target.value.substring(0, 19);
+        
+        if(target.value.length !== length) {
+            target.selectionEnd = position;
+        }
+    });
+
+    document.getElementById('agregarSaldoForm').addEventListener('submit', function(e) {
+        e.preventDefault();
+        if (this.checkValidity()) {
+            var formData = new FormData(this);
+            fetch('Controller?accion=AñadirSaldo', {
+                method: 'POST',
+                body: formData
+            })
+            .then(response => response.text())
+            .then(data => {
+                closeModalAgregarSaldo();
+                openConfirmacionModal(data);
+            })
+            .catch(error => {
+                console.error('Error:', error);
+                alert('Ocurrió un error al agregar el saldo');
+            });
+        } else {
+            alert('Por favor, complete todos los campos correctamente.');
+        }
+    });
+});
 </script>
 
 <%

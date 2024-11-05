@@ -71,7 +71,32 @@ public class DataCompra {
         }
         return t;
     }
-
+    
+    public void addTarjeta(Tarjeta t) {
+    	PreparedStatement stmt = null;
+    	try {
+    		stmt = DbConnector.getInstancia().getConn().prepareStatement(
+                    "INSERT INTO tarjeta (numero, nombre, fecha, cvv, saldo) VALUES (?, ?, ?, ?, ?)",
+                    PreparedStatement.RETURN_GENERATED_KEYS);
+            stmt.setString(1, t.getNumero());
+            stmt.setString(2, t.getNombre());
+            stmt.setString(3, t.getFecha());
+            stmt.setString(4, t.getCodigo());
+            stmt.setDouble(5, t.getSaldo());
+            r = stmt.executeUpdate();
+        } catch (SQLException e) {
+            System.err.println("Error " + e);
+        } finally {
+            if (stmt != null) {
+                try {
+                    stmt.close();
+                } catch (SQLException e) {
+                    System.err.println("Error al cerrar PreparedStatement: " + e);
+                }
+            }
+        }
+    }
+    
     public int ActualizaSaldo(Double monto, int id) {
         PreparedStatement stmt = null;
         try {
