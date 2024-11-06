@@ -4,7 +4,6 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.*;
 
-import entities.Carrito;
 import entities.*;
 
 public class DataCompra {
@@ -227,6 +226,73 @@ public class DataCompra {
             }
         }
         return idC;
+    }
+    
+    public List<DetalleCompra> getDetalles(int idcompra){
+    	List<DetalleCompra> detalles = new ArrayList<DetalleCompra>();
+    	PreparedStatement stmt = null;
+ 	    ResultSet rs = null;
+ 	    try {
+ 	    	stmt = DbConnector.getInstancia().getConn().prepareStatement(
+ 		            "SELECT * FROM detalle_compra WHERE idcompra = ? order by iddetalle");
+ 	    	stmt.setInt(1, idcompra);
+	        rs = stmt.executeQuery();
+	        while (rs.next()) {
+	            DetalleCompra detalle = new DetalleCompra();
+	            detalle.setId(rs.getInt("iddetalle"));
+	            detalle.setIdcompra(rs.getInt("idcompra"));
+	            detalle.setIdproducto(rs.getInt("idproducto"));
+	            detalle.setCantidad(rs.getInt("cantidad"));
+	            detalle.setPrecioCompra(rs.getDouble("precio_compra"));
+	            
+	            detalles.add(detalle);
+	        }
+ 	    }catch(Exception e) {
+ 	    	e.printStackTrace();
+ 	   } finally {
+	        try {
+	            if (rs != null) rs.close();
+	            if (stmt != null) stmt.close();
+	            DbConnector.getInstancia().releaseConn();
+	        } catch (SQLException e) {
+	            e.printStackTrace();
+	        }
+	    }
+    	return detalles;
+    }
+    
+    
+    public List<Compra> getMisCompras(int idpersona) {
+    	List<Compra> misCompras = new ArrayList<Compra>();
+    	PreparedStatement stmt = null;
+ 	    ResultSet rs = null;
+ 	    try {
+ 	    	stmt = DbConnector.getInstancia().getConn().prepareStatement(
+ 		            "SELECT id, idpago, fecha, monto, estado FROM compra WHERE idpersona = ? order by fecha desc");
+ 	    	stmt.setInt(1, idpersona);
+	        rs = stmt.executeQuery();
+	        while (rs.next()) {
+	            Compra comp = new Compra();
+	            comp.setId(rs.getInt("id"));
+	            comp.setIdpago(rs.getInt("idpago"));
+	            comp.setFecha(rs.getString("fecha"));
+	            comp.setMonto(rs.getDouble("monto"));
+	            comp.setEstado(rs.getString("estado"));
+	            
+	            misCompras.add(comp);
+	        }
+ 	    }catch(Exception e) {
+ 	    	e.printStackTrace();
+ 	   } finally {
+	        try {
+	            if (rs != null) rs.close();
+	            if (stmt != null) stmt.close();
+	            DbConnector.getInstancia().releaseConn();
+	        } catch (SQLException e) {
+	            e.printStackTrace();
+	        }
+	    }
+    	return misCompras;
     }
 }
 

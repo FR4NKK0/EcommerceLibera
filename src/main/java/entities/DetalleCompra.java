@@ -1,7 +1,7 @@
 package entities;
 
 public class DetalleCompra {
-	 int id;
+	 	int id;
 	    int idcompra;
 	    int idproducto;
 	    int cantidad;

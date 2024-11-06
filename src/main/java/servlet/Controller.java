@@ -42,6 +42,8 @@ public class Controller extends HttpServlet {
     int idPago;
     int rpago=0;
      FechaHoy fechaSistema= new FechaHoy();
+     private List<Compra> misCompras = new ArrayList<Compra>();
+     private List<DetalleCompra> detalles = new ArrayList<DetalleCompra>();
      private List<Persona> personas = new LinkedList<>();
     public Controller() {
         super();
@@ -143,10 +145,44 @@ public class Controller extends HttpServlet {
             case "AñadirSaldo":
             	agregarSaldo(request, response);
             	break;
+            case "MisCompras":
+            	listarMiscompras(request, response);
+            	break;
+            case "Detalles":
+            	listarDetalleCompra(request, response);
             default:
                 listarCatalogo(request, response);
                 break;
         }
+    }
+    
+    private void listarDetalleCompra(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
+    	try {
+    		int idcompra = Integer.parseInt(request.getParameter("idcompra"));
+    		detalles = dcompra.getDetalles(idcompra);
+    		request.setAttribute("detalles", detalles);
+    		request.getRequestDispatcher("detalle.jsp").forward(request, response);
+    	}catch(Exception e) {
+    		e.printStackTrace();
+    		request.setAttribute("error", "Ocurrió un error al cargar el detalle.");
+            request.getRequestDispatcher("detalle.jsp").forward(request, response);       
+    	}
+    }
+    
+    private void listarMiscompras(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
+    	try {
+    		Persona user = (Persona) request.getSession().getAttribute("user");
+            if (user != null) {
+                int idpersona = user.getId();
+                List<Compra> misCompras = dcompra.getMisCompras(idpersona);
+                request.setAttribute("misCompras", misCompras);
+            }
+            request.getRequestDispatcher("compras.jsp").forward(request, response);
+    	}catch(Exception e) {
+    		e.printStackTrace();
+    		request.setAttribute("error", "Ocurrió un error al cargar las compras.");
+            request.getRequestDispatcher("compras.jsp").forward(request, response);       
+    	}
     }
     
     private void agregarSaldo(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
