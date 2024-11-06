@@ -8,9 +8,9 @@
 <head>
 	<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css" integrity="sha384-k6RqeWeci5ZR/Lv4MR0sA0FfDOMm2JgX/aTk5lZeg6MOc1pYNeZTk5cBz6QeV6y" crossorigin="anonymous">
     <link rel="stylesheet" type="text/css" href="style/bulma.css">
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css"> 
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
 <meta charset="ISO-8859-1">
-<title>Detalle</title>
+<title>Administracion de compras</title>
 <style>
         .container {
             margin-top: 2rem;
@@ -51,7 +51,6 @@
     </style>
 </head>
 <body>
-
 <nav class="navbar has-shadow is-spaced is-warning" role="navigation" aria-label="main navigation">
         <div class="navbar-brand">
             <a class="navbar-item" href="Controller?accion=ListarCatalogo">
@@ -170,79 +169,206 @@
             </div>
         </div>
     </nav>
+    
+<%
+        boolean isAdmin = false;
+        if (user != null) {
+            Rol rol = new Rol();
+            rol.setDescripcion("admin");
+            DataRol dataRol = new DataRol();
+            rol = dataRol.getByDesc(rol);
+            isAdmin = user.hasRol(rol);
+        }
 
-
-
-	<div class="container">
-        <div class="section">
-            <h1 class="title">Detalles de la Compra</h1>
-            <% 
-                List<DetalleCompra> detalles = (List<DetalleCompra>) request.getAttribute("detalles");
-                DataProducto dp = new DataProducto();
-                if (detalles != null && !detalles.isEmpty()) {
-            %>
-                <table class="table is-fullwidth is-striped is-hoverable">
+        if (isAdmin) {
+    %>
+    
+    <div class="container">
+        <div class="form-section">
+            <div class="table-container">
+                <h3 class="title is-4">Compras</h3>
+                <hr>
+                
+                <table class="table is-striped is-bordered is-hoverable is-fullwidth">
                     <thead>
                         <tr>
-                            <th>ID</th>
-                            <th>Producto</th>
-                            <th>Cantidad</th>
-                            <th>Precio Unitario</th>
-                            <th>Subtotal</th>
+                            <th>ID Compra</th>
+                            <th>ID Persona</th>
+                            <th>Apellido</th>
+                            <th>ID Pago</th>
+                            <th>Fecha</th>
+                            <th>Monto</th>
+                            <th>Estado</th>
+                            <th>Detalles</th>
                         </tr>
                     </thead>
                     <tbody>
                         <% 
-                            double total = 0;
-                            for (DetalleCompra detalle : detalles) {
-                                Producto producto = dp.getById(detalle.getIdproducto());
-                                total += detalle.getCantidad() * detalle.getPrecioCompra();
+                            if (user != null) {
+                                List<Compra> compras = (List<Compra>) request.getAttribute("compras");
+                                if (compras != null && !compras.isEmpty()) {
+                                    for (Compra comp : compras) {
                         %>
-                            <tr>
-                                <td><%= detalle.getId() %></td>
-                                <td>
-                                    <div class="columns is-vcentered">
-                                    	<figure class="image is-64x64">
-                                        	<img src="ControllerImg?id=<%= producto.getId() %>" alt="<%= producto.getNombre() %>" style="max-width: 100px;">
-                                        </figure>
-                                        <div class="column">
-                                            <%= producto.getNombre() %>
-                                        </div>
-                                    </div>
-                                </td>
-                                <td><%= detalle.getCantidad() %></td>
-                                <td>$<%= String.format("%.2f", detalle.getPrecioCompra()) %></td>
-                                <td>$<%= String.format("%.2f", detalle.getCantidad() * detalle.getPrecioCompra()) %></td>
-                            </tr>
-                        <% } %>
-                    </tbody>
-                    <tfoot>
                         <tr>
-                            <th colspan="4" class="has-text-right">Total:</th>
-                            <th>$<%= String.format("%.2f", total) %></th>
+                            <td><%= comp.getId() %></td>
+                            <td><%= comp.getPersona().getId() %></td>
+                            <td><%= comp.getPersona().getApellido() %></td>
+                            <td><%= comp.getIdpago() %></td>
+                            <td><%= comp.getFecha() %></td>
+                            <td>$<%= String.format("%.2f", comp.getMonto()) %></td>
+                            <td><%= comp.getEstado() %></td>
+                            <td>
+                            	<div class="buttons">
+	                                <form action="Controller" method="post" style="display: inline;">
+	                                        <input type="hidden" name="accion" value="Detalles">
+	                                        <input type="hidden" name="idcompra" value="<%= comp.getId() %>">
+	                                        <button type="submit" class="button is-small is-info">
+	                                            <span class="icon is-small">
+	                                                <i class="fas fa-info-circle"></i>
+	                                            </span>
+	                                            <span>Ver Detalles</span>
+	                                        </button>
+	                                </form>
+	                                <button class="button is-small is-primary" onclick="openModal(<%= comp.getId() %>, '<%= comp.getEstado() %>')">
+                                        <span class="icon is-small">
+                                            <i class="fas fa-edit"></i>
+                                        </span>
+                                        <span>Cambiar Estado</span>
+                                    </button>
+	                             </div>
+                            </td>
                         </tr>
-                    </tfoot>
+                        <% 
+                                    }
+                                } else {
+                        %>
+                        <tr>
+                            <td colspan="5" class="has-text-centered">No hay compras registradas.</td>
+                        </tr>
+                        <%
+                                }
+                            } else {
+                        %>
+                        <tr>
+                            <td colspan="5" class="has-text-centered">Debes iniciar sesión para ver tus compras.</td>
+                        </tr>
+                        <%
+                            }
+                        %>
+                    </tbody>
                 </table>
-            <% } else { %>
-                <div class="notification is-warning">
-                    No se encontraron detalles para esta compra.
-                </div>
-            <% } %>
-            
-            <div class="buttons">
-    <button onclick="volverPaginaAnterior()" class="button is-primary">
-        <span class="icon">
-            <i class="fas fa-arrow-left"></i>
-        </span>
-        <span>Volver</span>
-    </button>
-</div>
+            </div>
         </div>
     </div>
-
-
-
-<div class="modal" id="addTarjetaModal">
+    
+    
+    <div class="modal" id="modal-register">
+        <div class="modal-background"></div>
+        <div class="modal-card">
+            <header class="modal-card-head">
+                <p class="modal-card-title">Registrar Persona</p>
+                <button class="delete" aria-label="close" id="btn-close"></button>
+            </header>
+            <section class="modal-card-body">
+                <form action="Controller?accion=Registrar" method="post" enctype="form-data">
+                    <div class="field">
+                        <label class="label">Tipo de Documento</label>
+                        <div class="control">
+                            <div class="select">
+                                <select name="tipo_doc">
+                                    <option value="dni">DNI</option>
+                                    <option value="cuit">CUIT</option>
+                                </select>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="field">
+                        <label class="label">Número de Documento</label>
+                        <div class="control">
+                            <input class="input" type="text" name="numero_doc" placeholder="Número de documento" required>
+                        </div>
+                    </div>
+                    <div class="field">
+                        <label class="label">Nombre</label>
+                        <div class="control">
+                            <input class="input" type="text" name="nombre" placeholder="Nombre" required>
+                        </div>
+                    </div>
+                    <div class="field">
+                        <label class="label">Apellido</label>
+                        <div class="control">
+                            <input class="input" type="text" name="apellido" placeholder="Apellido" required>
+                        </div>
+                    </div>
+                    <div class="field">
+                        <label class="label">Email</label>
+                        <div class="control">
+                            <input class="input" type="email" name="email" placeholder="Email" required>
+                        </div>
+                    </div>
+                    <div class="field">
+                        <label class="label">Teléfono</label>
+                        <div class="control">
+                            <input class="input" type="text" name="telefono" placeholder="Teléfono" required>
+                        </div>
+                    </div>
+                    <div class="field">
+                        <label class="label">Contraseña</label>
+                        <div class="control">
+                            <input class="input" type="password" id="password" name="password" placeholder="Contraseña" required>
+                        </div>
+                    </div>
+                    <div class="field">
+                        <label class="label">Confirmar Contraseña</label>
+                        <div class="control">
+                            <input class="input" type="password" id="confirm-password" placeholder="Confirmar contraseña" required>
+                        </div>
+                        <p class="help is-danger" id="password-error" style="display: none;">Las contraseñas no coinciden</p>
+                    </div>                   
+                    <div class="field is-grouped">
+                        <div class="control">
+                            <button type="submit" class="button is-link">Registrar</button>
+                        </div>
+                        <div class="control">
+                            <button type="button" class="button is-light" id="btn-cancel">Cancelar</button>
+                        </div>
+                    </div>
+                </form>
+            </section>
+        </div>
+    </div>
+    
+	<div class="modal" id="signInModal">
+	    <div class="modal-background"></div>
+	    <div class="modal-card">
+	        <header class="modal-card-head">
+	            <p class="modal-card-title">Sign in</p>
+	            <button class="delete" aria-label="close" id="closeSignInModal"></button>
+	        </header>
+	        <section class="modal-card-body">
+	            <form id="signInForm" method="post" action="Controller">
+	                <div class="field">
+	                    <label class="label">Email</label>
+	                    <div class="control">
+	                        <input class="input" type="email" name="email" placeholder="e.g. john@example.com" required>
+	                    </div>
+	                </div>
+	                <div class="field">
+	                    <label class="label">Password</label>
+	                    <div class="control">
+	                        <input class="input" type="password" name="password" placeholder="********" required>
+	                    </div>
+	                </div>
+	                <input type="hidden" name="accion" value="SignIn">
+	                <footer class="modal-card-foot">
+	                    <button type="submit" class="button is-primary">Sign in</button>
+	                    <button type="button" class="button" id="cancelSignIn">Cancel</button>
+	                </footer>
+	            </form>
+	        </section>
+	    </div>
+	</div>
+	<div class="modal" id="addTarjetaModal">
 	    <div class="modal-background"></div>
 		    <div class="modal-content">
 		        <div class="box">
@@ -342,7 +468,57 @@
 	        </div>
 	    </div>
 	</div>
-	
+	<div id="estadoModal" class="modal">
+        <div class="modal-background"></div>
+        <div class="modal-card">
+            <header class="modal-card-head">
+                <p class="modal-card-title">Cambiar Estado de la Compra</p>
+                <button class="delete" aria-label="close" onclick="closeModal()"></button>
+            </header>
+            <section class="modal-card-body">
+                <form id="cambiarEstadoForm" action="Controller" method="post">
+                    <input type="hidden" name="accion" value="CambiarEstado">
+                    <input type="hidden" id="idcompraModal" name="idcompra" value="">
+                    <div class="field">
+                        <label class="label">Nuevo Estado</label>
+                        <div class="control">
+                            <div class="select">
+                                <select id="nuevoEstado" name="nuevoEstado">
+                                    <option value="Pendiente">Pendiente</option>
+                                    <option value="En Proceso">En Proceso</option>
+                                    <option value="Enviado">Enviado</option>
+                                    <option value="Entregado">Entregado</option>
+                                    <option value="Cancelado">Cancelado</option>
+                                </select>
+                            </div>
+                        </div>
+                    </div>
+                </form>
+            </section>
+            <footer class="modal-card-foot">
+                <button class="button is-success" onclick="submitForm()">Guardar Cambios</button>
+                <button class="button" onclick="closeModal()">Cancelar</button>
+            </footer>
+        </div>
+    </div>
+
+    <script>
+        function openModal(idcompra, estadoActual) {
+            document.getElementById('idcompraModal').value = idcompra;
+            document.getElementById('nuevoEstado').value = estadoActual;
+            document.getElementById('estadoModal').classList.add('is-active');
+        }
+
+        function closeModal() {
+            document.getElementById('estadoModal').classList.remove('is-active');
+        }
+
+        function submitForm() {
+            document.getElementById('cambiarEstadoForm').submit();
+        }
+
+        document.querySelector('.modal-background').addEventListener('click', closeModal);
+    </script>
 	
 	
 	<script>
@@ -424,10 +600,74 @@ document.addEventListener('DOMContentLoaded', (event) => {
     });
 });
 </script>
-<script>
-    function volverPaginaAnterior() {
-        window.history.back();
-    }
-</script>
+	
+	<script>
+	    document.addEventListener('DOMContentLoaded', () => {
+	        // Referencias a elementos
+	        const signInButton = document.getElementById('signInButton');
+	        const signInModal = document.getElementById('signInModal');
+	        const closeSignInModal = document.getElementById('closeSignInModal');
+	        const cancelSignIn = document.getElementById('cancelSignIn');
+	
+	        // Mostrar modal de Sign in
+	        signInButton.addEventListener('click', () => {
+	            signInModal.classList.add('is-active');
+	        });
+	
+	        // Cerrar modal de Sign in
+	        closeSignInModal.addEventListener('click', () => {
+	            signInModal.classList.remove('is-active');
+	        });
+	        cancelSignIn.addEventListener('click', () => {
+	            signInModal.classList.remove('is-active');
+	        });
+	    });
+	</script>
+	
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            const modal = document.getElementById('modal-register');
+            const btnSignUp = document.getElementById('btn-signup');
+            const btnClose = document.getElementById('btn-close');
+            const btnCancel = document.getElementById('btn-cancel');
+            const form = document.getElementById('register-form');
+            const password = document.getElementById('password');
+            const confirmPassword = document.getElementById('confirm-password');
+            const passwordError = document.getElementById('password-error');
+
+            // Abrir modal
+            btnSignUp.addEventListener('click', () => {
+                modal.classList.add('is-active');
+            });
+
+            // Cerrar modal
+            btnClose.addEventListener('click', () => {
+                modal.classList.remove('is-active');
+            });
+
+            btnCancel.addEventListener('click', () => {
+                modal.classList.remove('is-active');
+            });
+
+            // Validar que las contraseñas coincidan antes de enviar el formulario
+            form.addEventListener('submit', (e) => {
+                if (password.value !== confirmPassword.value) {
+                    e.preventDefault();
+                    passwordError.style.display = 'block';
+                } else {
+                    passwordError.style.display = 'none';
+                }
+            });
+        });
+    </script>
+<% }else { %>    
+		<div class="container">
+	        <div class="notification is-danger">
+	            <p>No tienes permiso para ver esta página. Por favor, contacta a un administrador si crees que esto es un error.</p>
+	        </div>
+	    </div>
+    <%
+        }
+    %>
 </body>
 </html>

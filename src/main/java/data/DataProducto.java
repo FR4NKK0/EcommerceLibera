@@ -221,7 +221,7 @@ public class DataProducto {
 	    ResultSet rs = null;
 	    try {
 	        stmt = DbConnector.getInstancia().getConn().prepareStatement(
-	            "SELECT * FROM producto WHERE descripcion LIKE ?");
+	            "SELECT * FROM producto WHERE nombre LIKE ?");
 	        stmt.setString(1, "%" + nombre + "%");
 	        rs = stmt.executeQuery();
 	        while (rs.next()) {

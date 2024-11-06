@@ -43,6 +43,8 @@ public class Controller extends HttpServlet {
     int rpago=0;
      FechaHoy fechaSistema= new FechaHoy();
      private List<Compra> misCompras = new ArrayList<Compra>();
+     private List<Pago> pagos = new ArrayList<Pago>();
+     private List<Compra> compras = new ArrayList<Compra>();
      private List<DetalleCompra> detalles = new ArrayList<DetalleCompra>();
      private List<Persona> personas = new LinkedList<>();
     public Controller() {
@@ -150,10 +152,83 @@ public class Controller extends HttpServlet {
             	break;
             case "Detalles":
             	listarDetalleCompra(request, response);
+            case "ListarCompras":
+            	listarCompras(request, response);
+            case "CambiarEstado":
+                cambiarEstadoCompra(request, response);
+                break;
+            case "ResumenDeCompra":
+            	resumenCompra(request, response);
+            	 break;
+            case "ListarPagos":
+            	listarPagos(request, response);
+            	 break;
+            case "BuscarProducto":
+            	buscador(request, response);
+            	 break;
             default:
                 listarCatalogo(request, response);
                 break;
         }
+    }
+    
+    private void buscador(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
+    	try {
+    		String nombre = request.getParameter("txtBuscar");
+    		List<Producto> productos = dp.getByName(nombre);
+            request.setAttribute("productos", productos);
+            request.getRequestDispatcher("index.jsp").forward(request, response);
+    	}catch(Exception e) {
+    		e.printStackTrace();
+    	}
+    }
+    
+    private void listarPagos(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
+    	try {
+    		pagos = dcompra.getAllPagos();
+    		request.setAttribute("pagos", pagos);
+    		request.getRequestDispatcher("pagosADMIN.jsp").forward(request, response);
+    	}catch(Exception e) {
+    		e.printStackTrace();
+    		request.setAttribute("error", "Ocurrió un error al cargar las compras.");
+            request.getRequestDispatcher("pagosADMIN.jsp").forward(request, response);
+    	}
+    }
+    
+    private void resumenCompra(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
+    	idcompra = dcompra.getIdDeUltimaCompra();
+        List detalle1 = dcompra.getDetalles(idcompra);
+        request.setAttribute("myDetalle", detalle1);
+        request.getRequestDispatcher("resumenCompra.jsp").forward(request, response);
+    }
+    
+    private void cambiarEstadoCompra(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
+        try {
+            int idcompra = Integer.parseInt(request.getParameter("idcompra"));
+            String nuevoEstado = request.getParameter("nuevoEstado");
+            Compra estadoNuevo = new Compra();
+            estadoNuevo.setId(idcompra);
+            estadoNuevo.setEstado(nuevoEstado);
+            dcompra.actualizaEstado(estadoNuevo);
+            
+            response.sendRedirect("Controller?accion=ListarCompras");
+        } catch(Exception e) {
+            e.printStackTrace();
+            request.setAttribute("error", "Ocurrió un error al cambiar el estado de la compra.");
+            request.getRequestDispatcher("comprasADMIN.jsp").forward(request, response);
+        }
+    }
+    
+    private void listarCompras(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
+    	try {
+    		compras = dcompra.getAll();
+    		request.setAttribute("compras", compras);
+    		request.getRequestDispatcher("comprasADMIN.jsp").forward(request, response);
+    	}catch(Exception e) {
+    		e.printStackTrace();
+    		request.setAttribute("error", "Ocurrió un error al cargar las compras.");
+            request.getRequestDispatcher("comprasADMIN.jsp").forward(request, response);
+    	}
     }
     
     private void listarDetalleCompra(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
@@ -496,15 +571,15 @@ public class Controller extends HttpServlet {
     				pro.setStock(p.getCantidad());
     				dp.ActualizarStock(pro);
     			}
-    			/*listaCarrito= new ArrayList<>();
-    			List compras = dcompra.misCompras(persona.getId());
-    			request.getRequestDispatcher("Controller?=accion=Imprimir").forward(request, response);*/
-    			request.getRequestDispatcher("Controller?accion=ListarCatalogo").forward(request, response);
+    			listaCarrito= new ArrayList<>();
+    			misCompras = dcompra.getMisCompras(persona.getId());
+    			request.getRequestDispatcher("Controller?accion=ResumenDeCompra").forward(request, response);
+    			
     		} else {
     			request.getRequestDispatcher("Controller?accion=ListarCatalogo").forward(request, response);
     		}
     	} else {
-    		request.getRequestDispatcher("Controlador?accion=Carrito").forward(request, response);
+    		request.getRequestDispatcher("Controller?accion=Carrito").forward(request, response);
     	}
     }
     

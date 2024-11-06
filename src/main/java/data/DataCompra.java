@@ -71,6 +71,42 @@ public class DataCompra {
         return t;
     }
     
+    public Tarjeta GetTarjetaById(Tarjeta t) {
+        PreparedStatement stmt = null;
+        ResultSet rs = null;
+        try {
+            stmt = DbConnector.getInstancia().getConn().prepareStatement("SELECT * FROM tarjeta t WHERE id=?");
+            stmt.setInt(1, t.getId());
+            rs = stmt.executeQuery();
+            while (rs.next()) {
+                t.setId(rs.getInt(1));
+                t.setNumero(rs.getString(2));
+                t.setNombre(rs.getString(3));
+                t.setFecha(rs.getString(4));
+                t.setCodigo(rs.getString(5));
+                t.setSaldo(rs.getDouble(6));
+            }
+        } catch (SQLException e) {
+            System.err.println("Error " + e);
+        } finally {
+            if (rs != null) {
+                try {
+                    rs.close();
+                } catch (SQLException e) {
+                    System.err.println("Error al cerrar ResultSet: " + e);
+                }
+            }
+            if (stmt != null) {
+                try {
+                    stmt.close();
+                } catch (SQLException e) {
+                    System.err.println("Error al cerrar PreparedStatement: " + e);
+                }
+            }
+        }
+        return t;
+    }
+    
     public void addTarjeta(Tarjeta t) {
     	PreparedStatement stmt = null;
     	try {
@@ -228,6 +264,7 @@ public class DataCompra {
         return idC;
     }
     
+    
     public List<DetalleCompra> getDetalles(int idcompra){
     	List<DetalleCompra> detalles = new ArrayList<DetalleCompra>();
     	PreparedStatement stmt = null;
@@ -261,6 +298,44 @@ public class DataCompra {
     	return detalles;
     }
     
+    public List<Compra> getAll(){
+    	List<Compra> compras= new ArrayList<Compra>();
+    	PreparedStatement stmt = null;
+ 	    ResultSet rs = null;
+        DataPersona personaDAO = new DataPersona();
+ 	   try {
+	    	stmt = DbConnector.getInstancia().getConn().prepareStatement(
+		            "SELECT * FROM compra order by fecha desc");
+	        rs = stmt.executeQuery();
+	        while (rs.next()) {
+	            Compra comp = new Compra();
+	            Persona per = new Persona();
+	            comp.setId(rs.getInt("id"));
+	            per.setId(rs.getInt("idpersona"));
+	            per= personaDAO.getById(per);
+	            System.out.println(per.getApellido());
+	            comp.setPersona(per);
+	            System.out.println(comp.getPersona().getApellido());
+	            comp.setIdpago(rs.getInt("idpago"));
+	            comp.setFecha(rs.getString("fecha"));
+	            comp.setMonto(rs.getDouble("monto"));
+	            comp.setEstado(rs.getString("estado"));
+	            
+	            compras.add(comp);
+	        }
+	    }catch(SQLException e) {
+	    	e.printStackTrace();
+	   } finally {
+	        try {
+	            if (rs != null) rs.close();
+	            if (stmt != null) stmt.close();
+	            DbConnector.getInstancia().releaseConn();
+	        } catch (SQLException e) {
+	            e.printStackTrace();
+	        }
+	    }
+   	return compras;
+   }
     
     public List<Compra> getMisCompras(int idpersona) {
     	List<Compra> misCompras = new ArrayList<Compra>();
@@ -281,7 +356,7 @@ public class DataCompra {
 	            
 	            misCompras.add(comp);
 	        }
- 	    }catch(Exception e) {
+ 	    }catch(SQLException e) {
  	    	e.printStackTrace();
  	   } finally {
 	        try {
@@ -294,5 +369,62 @@ public class DataCompra {
 	    }
     	return misCompras;
     }
+    
+    public void actualizaEstado(Compra comp) {
+    	PreparedStatement stmt = null;
+ 	    ResultSet rs = null;
+ 	    try {
+ 	    	stmt = DbConnector.getInstancia().getConn().prepareStatement(
+ 		            "UPDATE compra SET estado=? WHERE id = ?");
+ 	    	stmt.setString(1, comp.getEstado());
+ 	    	stmt.setInt(2, comp.getId());
+	        stmt.executeUpdate();	       
+ 	    }catch(SQLException e) {
+ 	    	e.printStackTrace();
+ 	   } finally {
+	        try {
+	            if (rs != null) rs.close();
+	            if (stmt != null) stmt.close();
+	            DbConnector.getInstancia().releaseConn();
+	        } catch (SQLException e) {
+	            e.printStackTrace();
+	        }
+	    }
+    }
+    
+    public List<Pago> getAllPagos(){
+    	List<Pago> pagos= new ArrayList<Pago>();
+    	PreparedStatement stmt = null;
+ 	    ResultSet rs = null;
+ 	    DataCompra dc= new DataCompra();
+ 	   try {
+	    	stmt = DbConnector.getInstancia().getConn().prepareStatement(
+		            "SELECT * FROM pago order by id desc");
+	        rs = stmt.executeQuery();
+	        while (rs.next()) {
+	            Pago p = new Pago();
+	            Tarjeta t = new Tarjeta();
+	            p.setId(rs.getInt("id"));
+	            p.setMonto(rs.getDouble("monto"));
+	            t.setId(rs.getInt("idtarjeta"));
+	            t= dc.GetTarjetaById(t);
+	            p.setTarjeta(t);
+	            
+	            pagos.add(p);
+	        }
+	    }catch(SQLException e) {
+	    	e.printStackTrace();
+	   } finally {
+	        try {
+	            if (rs != null) rs.close();
+	            if (stmt != null) stmt.close();
+	            DbConnector.getInstancia().releaseConn();
+	        } catch (SQLException e) {
+	            e.printStackTrace();
+	        }
+	    }
+   	return pagos;
+   }
+    
 }
 

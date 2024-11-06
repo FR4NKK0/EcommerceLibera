@@ -106,8 +106,7 @@ public class DataPersona {
 			stmt=DbConnector.getInstancia().getConn().prepareStatement(
 					"select id,nombre,apellido,tipo_doc,nro_doc,email,tel,habilitado from persona where id= ?"
 					);
-			stmt.setString(1, per.getEmail());
-			stmt.setString(2, per.getPassword());
+			stmt.setInt(1, per.getId());
 			rs=stmt.executeQuery();
 			if(rs!=null && rs.next()) {
 				p=new Persona();

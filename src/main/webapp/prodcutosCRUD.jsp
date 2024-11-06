@@ -51,7 +51,7 @@
     </style>
 </head>
 <body>
-   <nav class="navbar has-shadow is-spaced is-warning" role="navigation" aria-label="main navigation">
+  <nav class="navbar has-shadow is-spaced is-warning" role="navigation" aria-label="main navigation">
         <div class="navbar-brand">
             <a class="navbar-item" href="Controller?accion=ListarCatalogo">
                 <img src="style/iconcarrito.png" alt="Home" class="logo-image">
@@ -69,14 +69,20 @@
                     Ofertas del Día
                 </a>
                 <div class="navbar-item">
-                    <form>
-                        <div class="control has-icons-left">
-                            <input class="input" type="text" placeholder="Search">
-                            <span class="icon is-left">
-                                <i class="fas fa-search"></i>
-                            </span>
-                        </div>
-                    </form>
+                    <form action="Controller" method="GET">
+					    <div class="field has-addons">
+					        <div class="control has-icons-left">
+					            <input class="input" type="text" name="txtBuscar" placeholder="Buscar producto">
+					            <span class="icon is-left">
+					                <i class="fas fa-search"></i>
+					            </span>
+					        </div>
+					        <div class="control">
+					            <button class="button is-info" type="submit">Buscar</button>
+					        </div>
+					        <input type="hidden" name="accion" value="BuscarProducto">
+					    </div>
+					</form>
                 </div>
             </div>
 
@@ -122,6 +128,12 @@
                                     </a>
                                     <a class="navbar-item" href="Controller?accion=ListarPersonas">
                                         Usuarios
+                                    </a>
+                                    <a class="navbar-item" href="Controller?accion=ListarCompras">
+                                        Compras
+                                    </a>
+                                    <a class="navbar-item" href="Controller?accion=ListarPagos">
+                                        Pagos
                                     </a>
                                 	</div>
                                 </div>
